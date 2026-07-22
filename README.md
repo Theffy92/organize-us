@@ -50,7 +50,7 @@ The latest version of the project is automatically deployed with GitHub Pages wh
 
 **Live URL:**
 
-https://theffy92.github.io/your-repository-name/
+https://theffy92.github.io/organize-us/
 
 
 
