@@ -153,6 +153,4 @@ Requirements:
 
 ## Contributors
 
-- Theffy
-- Meron
-- Serenity
+
