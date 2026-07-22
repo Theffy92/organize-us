@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OrganizeUS | Documents</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="documents">
+	<header class="topbar">
+		<div class="topbar-inner">
+			<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span><span>OrganizeUS</span></a>
+			<button class="mobile-nav-toggle" data-sidebar-toggle aria-label="Toggle navigation" aria-expanded="false"></button>
+			<div class="header-actions"><span class="muted-pill"><span class="assistant-avatar" aria-hidden="true">M</span> Meron</span></div>
+		</div>
+	</header>
+
+	<main class="app-shell">
+		<aside class="sidebar" data-sidebar>
+			<nav class="sidebar-nav" aria-label="Documents navigation">
+				<a class="nav-link" data-nav="dashboard" href="dashboard.html"><span class="nav-icon" aria-hidden="true">⌂</span>Dashboard</a>
+				<a class="nav-link" data-nav="travel" href="travel.html"><span class="nav-icon" aria-hidden="true">✈</span>Travel History</a>
+				<a class="nav-link" data-nav="documents" href="documents.html"><span class="nav-icon" aria-hidden="true">📄</span>Documents</a>
+				<a class="nav-link" data-nav="timeline" href="timeline.html"><span class="nav-icon" aria-hidden="true">⏱</span>Timeline</a>
+			</nav>
+		</aside>
+
+		<section class="content-stack">
+			<header class="page-card" style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+				<div class="page-heading">
+					<h1 class="page-title">Documents</h1>
+					<p>Track your key immigration documents.</p>
+				</div>
+				<button class="btn" type="button" data-open-modal>+ Add Document</button>
+			</header>
+
+			<section class="document-grid" data-document-grid>
+				<article class="document-card" data-document-card>
+					<div class="doc-icon">📘</div>
+					<h3>Passport</h3>
+					<p>Expires: May 2029</p>
+					<p>Stored: Google Safe</p>
+					<span class="pill success">On file</span>
+				</article>
+				<article class="document-card" data-document-card>
+					<div class="doc-icon">🪪</div>
+					<h3>Green Card</h3>
+					<p>Expires: 2031</p>
+					<p>Stored: Desk Drawer</p>
+					<span class="pill success">On file</span>
+				</article>
+				<article class="document-card danger" data-document-card>
+					<div class="doc-icon">📄</div>
+					<h3>Birth Certificate</h3>
+					<p>Original copy not yet organized.</p>
+					<span class="pill danger">Missing</span>
+				</article>
+				<article class="document-card" data-document-card>
+					<div class="doc-icon">💍</div>
+					<h3>Marriage Certificate</h3>
+					<p>Expires: Not applicable</p>
+					<p>Stored: Filing folder</p>
+					<span class="pill warning">Expiring soon</span>
+				</article>
+			</section>
+
+			<section class="empty-state" data-document-empty>
+				<strong>No documents organized yet.</strong>
+				<p>Use Add Document to create a temporary sample card. File uploads are intentionally disabled in this prototype.</p>
+			</section>
+
+			<section class="panel">
+				<h3>Organizational overview</h3>
+				<div class="info-grid" style="margin-top:16px; grid-template-columns: repeat(3, minmax(0, 1fr));">
+					<div class="info-row"><span>Tracked documents</span><strong data-total-documents>4</strong></div>
+					<div class="info-row"><span>On file</span><strong>2</strong></div>
+					<div class="info-row"><span>Needs attention</span><strong>2</strong></div>
+				</div>
+			</section>
+		</section>
+	</main>
+
+	<div class="modal-backdrop" data-modal-backdrop aria-hidden="true">
+		<section class="modal" role="dialog" aria-modal="true" aria-labelledby="add-document-title">
+			<div class="modal-header">
+				<div>
+					<h3 id="add-document-title">Add Document</h3>
+					<p>Create a temporary sample document card.</p>
+				</div>
+				<button class="close-button" type="button" data-close-modal aria-label="Close modal">×</button>
+			</div>
+			<form data-document-form>
+				<div class="field-grid">
+					<label class="field-group full"><span class="field-label">Document name</span><input name="name" type="text" placeholder="Marriage Certificate" required></label>
+					<label class="field-group"><span class="field-label">Status</span><select name="status"><option>On file</option><option>Missing</option><option>Expiring soon</option></select></label>
+					<label class="field-group"><span class="field-label">Stored location</span><input name="location" type="text" placeholder="Home safe"></label>
+					<label class="field-group full"><span class="field-label">Expiration note</span><input name="expiry" type="text" placeholder="Optional text, such as May 2029"></label>
+				</div>
+				<div class="modal-actions" style="margin-top:18px;">
+					<button class="btn-secondary" type="button" data-close-modal>Cancel</button>
+					<button class="btn" type="submit">Add Document</button>
+				</div>
+			</form>
+		</section>
+	</div>
+
+	<script src="js/app.js"></script>
+</body>
+</html>

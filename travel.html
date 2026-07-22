@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OrganizeUS | Travel History</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="travel">
+	<header class="topbar">
+		<div class="topbar-inner">
+			<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span><span>OrganizeUS</span></a>
+			<button class="mobile-nav-toggle" data-sidebar-toggle aria-label="Toggle navigation" aria-expanded="false"></button>
+			<div class="header-actions"><span class="muted-pill"><span class="assistant-avatar" aria-hidden="true">M</span> Meron</span></div>
+		</div>
+	</header>
+
+	<main class="app-shell">
+		<aside class="sidebar" data-sidebar>
+			<nav class="sidebar-nav" aria-label="Travel navigation">
+				<a class="nav-link" data-nav="dashboard" href="dashboard.html"><span class="nav-icon" aria-hidden="true">⌂</span>Dashboard</a>
+				<a class="nav-link" data-nav="travel" href="travel.html"><span class="nav-icon" aria-hidden="true">✈</span>Travel History</a>
+				<a class="nav-link" data-nav="documents" href="documents.html"><span class="nav-icon" aria-hidden="true">📄</span>Documents</a>
+				<a class="nav-link" data-nav="timeline" href="timeline.html"><span class="nav-icon" aria-hidden="true">⏱</span>Timeline</a>
+			</nav>
+		</aside>
+
+		<section class="content-stack">
+			<header class="page-card" style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+				<div class="page-heading">
+					<h1 class="page-title">Travel History</h1>
+					<p>All recorded trips outside the United States.</p>
+				</div>
+				<button class="btn" type="button" data-open-modal>+ Add Trip</button>
+			</header>
+
+			<section class="travel-stats">
+				<article class="dashboard-stat"><h3>Total Trips</h3><div class="big-number" data-total-trips>4</div></article>
+				<article class="dashboard-stat"><h3>Total Days Abroad</h3><div class="big-number" data-total-days>53</div></article>
+				<article class="dashboard-stat"><h3>Countries Visited</h3><div class="big-number">3</div></article>
+			</section>
+
+			<section class="table-card">
+				<div class="table-wrap">
+					<table aria-label="Travel history table">
+						<thead>
+							<tr>
+								<th>Country</th>
+								<th>Departure</th>
+								<th>Return</th>
+								<th>Duration</th>
+							</tr>
+						</thead>
+						<tbody data-travel-list>
+							<tr data-days="16"><td><div class="table-country"><strong>Argentina</strong><span>International</span></div></td><td>Jan 3, 2024</td><td>Jan 18, 2024</td><td><span class="pill neutral">16 days</span></td></tr>
+							<tr data-days="9"><td><div class="table-country"><strong>Canada</strong><span>International</span></div></td><td>Jul 10, 2023</td><td>Jul 18, 2023</td><td><span class="pill neutral">9 days</span></td></tr>
+							<tr data-days="14"><td><div class="table-country"><strong>Mexico</strong><span>International</span></div></td><td>Dec 20, 2022</td><td>Jan 3, 2023</td><td><span class="pill neutral">14 days</span></td></tr>
+							<tr data-days="14"><td><div class="table-country"><strong>Argentina</strong><span>International</span></div></td><td>Jun 5, 2021</td><td>Jun 19, 2021</td><td><span class="pill neutral">14 days</span></td></tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<section class="empty-state" data-travel-empty>
+				<strong>No trips added yet.</strong>
+				<p>Use Add Trip to record a new trip outside the United States. Temporary entries appear in the table above.</p>
+			</section>
+		</section>
+	</main>
+
+	<div class="modal-backdrop" data-modal-backdrop aria-hidden="true">
+		<section class="modal" role="dialog" aria-modal="true" aria-labelledby="add-trip-title">
+			<div class="modal-header">
+				<div>
+					<h3 id="add-trip-title">Add Trip</h3>
+					<p>Enter a fictional sample trip for the prototype.</p>
+				</div>
+				<button class="close-button" type="button" data-close-modal aria-label="Close modal">×</button>
+			</div>
+			<form data-travel-form>
+				<div class="field-grid two">
+					<label class="field-group"><span class="field-label">Country</span><input name="country" type="text" placeholder="Chile" required></label>
+					<label class="field-group"><span class="field-label">Departure date</span><input name="departure" type="date" required></label>
+					<label class="field-group full"><span class="field-label">Return date</span><input name="returnDate" type="date" required></label>
+				</div>
+				<div class="modal-actions" style="margin-top:18px;">
+					<button class="btn-secondary" type="button" data-close-modal>Cancel</button>
+					<button class="btn" type="submit">Add Trip</button>
+				</div>
+			</form>
+		</section>
+	</div>
+
+	<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OrganizeUS | Onboarding</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="onboarding" class="onboarding-page">
+	<main class="onboarding-shell">
+		<div class="app-topbar" style="padding-top:0;">
+			<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span><span>OrganizeUS</span></a>
+			<a class="btn-ghost" href="index.html">Back to home</a>
+		</div>
+
+		<section class="onboarding-card" aria-labelledby="onboarding-title">
+			<div class="assistant-header">
+				<div class="assistant-name">
+					<span class="assistant-avatar" aria-hidden="true">★</span>
+					<div>
+						<div id="onboarding-title">AI Organizer</div>
+						<div class="assistant-status">● Static prototype</div>
+					</div>
+				</div>
+				<div class="step-pill">Step <span data-step-indicator>1 of 3</span></div>
+			</div>
+			<div class="assistant-body">
+				<div class="progress-header">
+					<div>
+						<div class="progress-label">Onboarding progress</div>
+						<div class="progress-track" aria-hidden="true"><div class="progress-bar purple" data-onboarding-progress style="width:33%"></div></div>
+					</div>
+					<span class="status-tag success">Guided flow</span>
+				</div>
+
+				<div class="chat-stream">
+					<div class="onboarding-step" data-onboarding-step>
+						<div class="chat-row"><div class="bubble">Hi! I&apos;ll help you organize your immigration information.</div></div>
+						<div class="chat-row"><div class="bubble">What name should we use for your profile?</div></div>
+						<label class="field-group" for="profile-name">
+							<span class="field-label">Profile name</span>
+							<input id="profile-name" name="profileName" type="text" placeholder="Meron" value="Meron">
+						</label>
+					</div>
+
+					<div class="onboarding-step" data-onboarding-step hidden>
+						<div class="chat-row"><div class="bubble">When did you first enter the United States?</div></div>
+						<label class="field-group" for="first-entry">
+							<span class="field-label">First entry date</span>
+							<input id="first-entry" name="firstEntry" type="month" value="2020-08">
+						</label>
+						<label class="field-group" for="entry-notes">
+							<span class="field-label">Notes</span>
+							<textarea id="entry-notes" name="entryNotes" rows="3" placeholder="Add a reminder or note for your own records"></textarea>
+						</label>
+					</div>
+
+					<div class="onboarding-step" data-onboarding-step hidden>
+						<div class="chat-row"><div class="bubble">Great. Have you traveled outside the U.S. since then?</div></div>
+						<div class="step-choices" data-choice-group>
+							<button type="button" class="choice active" data-choice data-field="travelStatus">Yes</button>
+							<button type="button" class="choice" data-choice data-field="travelStatus">No</button>
+						</div>
+						<label class="field-group" for="travel-comment">
+							<span class="field-label">Comment</span>
+							<input id="travel-comment" name="travelStatus" type="text" value="Yes" placeholder="Yes">
+						</label>
+						<div class="chat-row"><div class="bubble">Perfect - we&apos;ll add those trips next.</div></div>
+					</div>
+				</div>
+
+				<div class="input-row" aria-hidden="true">
+					<input type="text" placeholder="Type a message..." disabled>
+					<button class="btn-secondary" type="button">Send →</button>
+				</div>
+
+				<div class="onboarding-actions">
+					<button class="btn-secondary" type="button" data-onboarding-back>Back</button>
+					<button class="btn" type="button" data-onboarding-next>Continue</button>
+					<button class="btn-success" type="button" data-onboarding-finish hidden>Continue to Dashboard →</button>
+				</div>
+			</div>
+		</section>
+	</main>
+	<script src="js/app.js"></script>
+</body>
+</html>

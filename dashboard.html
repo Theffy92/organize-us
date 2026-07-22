@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OrganizeUS | Dashboard</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="dashboard">
+	<header class="topbar">
+		<div class="topbar-inner">
+			<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span><span>OrganizeUS</span></a>
+			<button class="mobile-nav-toggle" data-sidebar-toggle aria-label="Toggle navigation" aria-expanded="false"></button>
+			<div class="header-actions"><span class="muted-pill"><span class="assistant-avatar" aria-hidden="true">M</span> Meron</span></div>
+		</div>
+	</header>
+
+	<main class="app-shell">
+		<aside class="sidebar" data-sidebar>
+			<nav class="sidebar-nav" aria-label="Dashboard navigation">
+				<a class="nav-link" data-nav="dashboard" href="dashboard.html"><span class="nav-icon" aria-hidden="true">⌂</span>Dashboard</a>
+				<a class="nav-link" data-nav="travel" href="travel.html"><span class="nav-icon" aria-hidden="true">✈</span>Travel History</a>
+				<a class="nav-link" data-nav="documents" href="documents.html"><span class="nav-icon" aria-hidden="true">📄</span>Documents</a>
+				<a class="nav-link" data-nav="timeline" href="timeline.html"><span class="nav-icon" aria-hidden="true">⏱</span>Timeline</a>
+			</nav>
+		</aside>
+
+		<section class="content-stack">
+			<header class="dashboard-hero panel">
+				<div class="page-heading">
+					<h1 class="page-title">Hello, Meron! 👋</h1>
+					<p>Here&apos;s your immigration preparation overview.</p>
+				</div>
+			</header>
+
+			<section class="dashboard-grid">
+				<article class="summary-card">
+					<div class="summary-row">
+						<div>
+							<div class="progress-label">Organizational completion score</div>
+							<div class="big-number">80%</div>
+						</div>
+						<span class="status-tag success">On Track</span>
+					</div>
+					<div class="progress-line" aria-hidden="true"><div class="progress-bar green" style="width:80%"></div></div>
+					<div class="quick-action-grid" style="margin-top:18px;">
+						<div class="page-card"><strong>Complete</strong><p>Travel History</p></div>
+						<div class="page-card"><strong>Complete</strong><p>Documents</p></div>
+						<div class="page-card"><strong>Missing Info</strong><p>Timeline Summary</p></div>
+						<div class="page-card"><strong>Not Started</strong><p>Ready-to-Review</p></div>
+					</div>
+				</article>
+
+				<article class="panel">
+					<h3>At a Glance</h3>
+					<div class="info-grid" style="margin-top:16px; grid-template-columns: 1fr;">
+						<div class="info-row"><span>Total trips abroad</span><strong>4</strong></div>
+						<div class="info-row"><span>Days outside U.S.</span><strong>53</strong></div>
+						<div class="info-row"><span>Documents tracked</span><strong>3</strong></div>
+						<div class="info-row"><span>Organizational progress</span><strong>86%</strong></div>
+					</div>
+				</article>
+			</section>
+
+			<section class="dashboard-grid">
+				<article class="panel">
+					<h3>Quick Actions</h3>
+					<div class="quick-action-grid" style="margin-top:16px;">
+						<a class="nav-link action-link" href="travel.html"><span class="nav-icon" aria-hidden="true">✈</span>Add Trip</a>
+						<a class="nav-link action-link" href="documents.html"><span class="nav-icon" aria-hidden="true">📄</span>Add Document</a>
+						<a class="nav-link action-link" href="timeline.html"><span class="nav-icon" aria-hidden="true">⏱</span>View Timeline</a>
+						<a class="nav-link action-link" href="timeline.html"><span class="nav-icon" aria-hidden="true">✓</span>Check Progress</a>
+					</div>
+				</article>
+
+				<article class="panel">
+					<h3>Suggested Next Step</h3>
+					<p>Review the timeline summary and fill the remaining missing details before saving your personal records.</p>
+					<div class="page-divider"></div>
+					<div class="summary-list" style="display:flex; flex-wrap:wrap; gap:12px;">
+						<span class="pill warning">Missing issue date</span>
+						<span class="pill neutral">Ready for review later</span>
+					</div>
+				</article>
+			</section>
+		</section>
+	</main>
+
+	<script src="js/app.js"></script>
+</body>
+</html>

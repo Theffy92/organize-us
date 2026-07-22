@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OrganizeUS | Timeline &amp; Progress</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="timeline">
+	<header class="topbar">
+		<div class="topbar-inner">
+			<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span><span>OrganizeUS</span></a>
+			<button class="mobile-nav-toggle" data-sidebar-toggle aria-label="Toggle navigation" aria-expanded="false"></button>
+			<div class="header-actions"><span class="muted-pill"><span class="assistant-avatar" aria-hidden="true">M</span> Meron</span></div>
+		</div>
+	</header>
+
+	<main class="app-shell">
+		<aside class="sidebar" data-sidebar>
+			<nav class="sidebar-nav" aria-label="Timeline navigation">
+				<a class="nav-link" data-nav="dashboard" href="dashboard.html"><span class="nav-icon" aria-hidden="true">⌂</span>Dashboard</a>
+				<a class="nav-link" data-nav="travel" href="travel.html"><span class="nav-icon" aria-hidden="true">✈</span>Travel History</a>
+				<a class="nav-link" data-nav="documents" href="documents.html"><span class="nav-icon" aria-hidden="true">📄</span>Documents</a>
+				<a class="nav-link active" data-nav="timeline" href="timeline.html"><span class="nav-icon" aria-hidden="true">⏱</span>Timeline</a>
+			</nav>
+		</aside>
+
+		<section class="content-stack">
+			<header class="page-card" style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+				<div class="page-heading">
+					<h1 class="page-title">Timeline &amp; Readiness</h1>
+					<p>Your full immigration timeline and organizational completion overview.</p>
+				</div>
+			</header>
+
+			<section class="timeline-grid">
+				<article class="timeline-panel">
+					<h3>My Immigration Timeline</h3>
+					<ul class="timeline-list">
+						<li class="timeline-item"><div><strong>2018</strong><p>Born</p></div></li>
+						<li class="timeline-item"><div><strong>2020</strong><p>Entered United States</p></div></li>
+						<li class="timeline-item"><div><strong>2021</strong><p>Received Green Card</p></div></li>
+						<li class="timeline-item"><div><strong>2023</strong><p>Trip to Canada</p></div></li>
+						<li class="timeline-item"><div><strong>2024</strong><p>Trip to Argentina</p></div></li>
+						<li class="timeline-item"><div><strong>2024</strong><p>Preparing N-400</p></div></li>
+					</ul>
+				</article>
+
+				<div class="content-stack">
+					<article class="summary-card">
+						<h3>Organizational completion score</h3>
+						<div class="ring-wrap" data-score="86"><div class="ring-value" data-score-value>86%</div></div>
+						<p>You&apos;re close to having a complete personal record set for your own organization.</p>
+					</article>
+
+					<article class="summary-card">
+						<h3>Sample summary</h3>
+						<p class="subtle">Prototype summary only. This does not provide legal advice or eligibility analysis.</p>
+						<div class="page-divider"></div>
+						<div class="summary-list" style="display:grid; gap:10px;">
+							<p>• You entered the U.S. in 2020.</p>
+							<p>• You have recorded 4 international trips.</p>
+							<p>• Your Green Card expires in 2031.</p>
+							<p>• You are still missing the issue date of your passport.</p>
+						</div>
+					</article>
+
+					<article class="summary-card">
+						<h3>Missing information</h3>
+						<div class="info-row"><span>Passport issue date</span><span class="pill warning">Missing</span></div>
+						<div class="info-row"><span>Additional travel notes</span><span class="pill neutral">Optional</span></div>
+						<div class="info-row"><span>Employment history</span><span class="pill neutral">Not tracked yet</span></div>
+						<div class="page-divider"></div>
+						<p>Suggested next step: review your passport details and add any remaining trips or notes before saving your records.</p>
+					</article>
+				</div>
+			</section>
+		</section>
+	</main>
+
+	<script src="js/app.js"></script>
+</body>
+</html>
