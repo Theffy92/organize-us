@@ -87,7 +87,8 @@ function setupTravelPage() {
 	const rows = document.querySelector('[data-travel-list]');
 	const emptyState = document.querySelector('[data-travel-empty]');
 	const totalTrips = document.querySelector('[data-total-trips]');
-	const totalDays = document.querySelector('[data-total-days]');
+	const totalDays = document.querySelector('[data-total-days]'); 
+	const countriesVisited = document.querySelector('[data-countries-visited]');
 	if (!form || !rows) return;
 
 	const updateStats = () => {
@@ -97,7 +98,15 @@ function setupTravelPage() {
 		items.forEach((row) => {
 			dayCount += Number(row.dataset.days || 0);
 		});
-		if (totalDays) totalDays.textContent = String(dayCount);
+		if (totalDays) totalDays.textContent = String(dayCount); 
+		const uniqueCountries = new Set(
+  	       Array.from(items).map((row) =>
+              row.querySelector('.table-country strong')?.textContent.trim()
+         )
+        );
+		if (countriesVisited){
+			countriesVisited.textContent = String(uniqueCountries.size);
+		}
 		if (emptyState) emptyState.hidden = items.length > 0;
 	};
 
