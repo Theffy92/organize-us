@@ -128,7 +128,14 @@ function setupTravelPage() {
 			<td>${formatDate(departureDate)}</td>
 			<td>${formatDate(returnDateValue)}</td>
 			<td><span class="pill neutral">${duration} days</span></td>
+			<td><button type="button" class="delete-trip">Delete</button></td>
 		`;
+		const deleteButton = row.querySelector('.delete-trip');
+
+		deleteButton.addEventListener('click', () => {
+  		row.remove();
+  		updateStats();
+		});
 
 		rows.prepend(row);
 		form.reset();
