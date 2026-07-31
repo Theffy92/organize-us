@@ -87,8 +87,7 @@ function setupTravelPage() {
 	const rows = document.querySelector('[data-travel-list]');
 	const emptyState = document.querySelector('[data-travel-empty]');
 	const totalTrips = document.querySelector('[data-total-trips]');
-	const totalDays = document.querySelector('[data-total-days]'); 
-	const countriesVisited = document.querySelector('[data-countries-visited]');
+	const totalDays = document.querySelector('[data-total-days]');
 	if (!form || !rows) return;
 
 	const updateStats = () => {
@@ -98,25 +97,9 @@ function setupTravelPage() {
 		items.forEach((row) => {
 			dayCount += Number(row.dataset.days || 0);
 		});
-		if (totalDays) totalDays.textContent = String(dayCount); 
-		const uniqueCountries = new Set(
-  	       Array.from(items).map((row) =>
-              row.querySelector('.table-country strong')?.textContent.trim()
-         )
-        );
-		if (countriesVisited){
-			countriesVisited.textContent = String(uniqueCountries.size);
-		}
+		if (totalDays) totalDays.textContent = String(dayCount);
 		if (emptyState) emptyState.hidden = items.length > 0;
 	};
-	rows.addEventListener('click', (event) => {
-    const deleteButton = event.target.closest('.delete-trip');
-
-      if (!deleteButton) return;
-
-      deleteButton.closest('tr').remove();
-      updateStats();
-    });
 
 	form.addEventListener('submit', (event) => {
 		event.preventDefault();
@@ -136,8 +119,8 @@ function setupTravelPage() {
 			<td>${formatDate(departureDate)}</td>
 			<td>${formatDate(returnDateValue)}</td>
 			<td><span class="pill neutral">${duration} days</span></td>
-			<td><button type="button" class="delete-trip">Delete</button></td>
 		`;
+
 		rows.prepend(row);
 		form.reset();
 		updateStats();
@@ -202,6 +185,9 @@ function setupDocumentsPage() {
 }
 
 function setupOnboarding() {
+	const input = document.getElementById("chat-input");
+	const send = document.getElementById("chat-send");
+	const chat = document.querySelector(".chat-stream");
 	const steps = Array.from(document.querySelectorAll('[data-onboarding-step]'));
 	const progressBar = document.querySelector('[data-onboarding-progress]');
 	const stepIndicator = document.querySelector('[data-step-indicator]');
@@ -278,4 +264,46 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupDocumentsPage();
 	setupOnboarding();
 	setupScoreRings();
+});
+
+
+// to display the message in the chat stream
+function addMessage(text) {
+    const row = document.createElement("div");
+    row.className = "chat-row";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+
+    row.appendChild(bubble);
+    chat.appendChild(row);
+
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// makes sure went "Send" it clicked
+send.addEventListener("click", async () => {
+
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    addMessage(message); // show user's message
+
+    input.value = "";
+
+    const response = await fetch("https://YOUR-BACKEND-URL/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: message
+        })
+    });
+
+    const data = await response.json();
+
+    addMessage(data.response); // show AI reply
 });
