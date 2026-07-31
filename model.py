@@ -37,3 +37,6 @@ def run_model(query: str) -> str:
     )
 
     return response.choices[0].message.content
+
+# testing
+# print(run_model("Hello, I am looking for information on how to organize my immigration process in the US. Can you help me with that?"))
