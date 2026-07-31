@@ -86,9 +86,13 @@ python3 -m http.server 8000
 
    Then open the forwarded port provided by GitHub Codespaces.
 
-6. Commit and push your branch.
-7. Open a pull request and wait for it to be reviewed and merged into `main`.
-8. Repeat the process for each new task.
+6. Before committing, make sure your feature branch is still up to date with main.
+
+   If other pull requests have been merged since you created your branch, bring the latest changes from `main` into `your branch`, resolve any merge conflicts if necessary, and test your changes again before      committing. This helps avoid conflicts later and ensures your work is compatible with the latest version of the project.
+7. Commit and push your branch.
+8. Open a pull request. If there are no merge conflicts and all checks pass, you don't need to wait for approval; go ahead and merge it into `main`.
+9. After merging, post a quick update in the #building channel so everyone knows `main` has changed and can update their feature branches before opening or merging their own pull requests.
+10. Repeat the process for each new task.
 
 Example branch names:
 
