@@ -1,7 +1,8 @@
-from groq import Groq
 import os
+from groq import Groq
+from dotenv import load_dotenv
 
-
+load_dotenv()  # Load environment variables from .env file
 
 def _get_groq_client():
     """Initialize and return a Groq client using GROQ_API_KEY from .env."""
@@ -9,30 +10,42 @@ def _get_groq_client():
     if not api_key:
         raise ValueError(
             "GROQ_API_KEY not set. Add it to a .env file in the project root."
+            "or deployment environment variables."
         )
     return Groq(api_key=api_key)
 
 
-SYSTEM_PROMPT = "You are a helpful assistant that provides detailed and accurate information to organize immigration information. The first question you ask is to get to know the user's name and the country they are immigrating from. Then you will ask for the user's immigration status and purpose of the visit. You will ask them about any other details. DO NOT ASK FOR ANY SENSITIVE INFORMATION SUCH AS PASSPORT NUMBER, SOCIAL SECURITY NUMBER, OR ANY OTHER PERSONAL IDENTIFIERS."
+SYSTEM_PROMPT = """
+You are a helpful assistant that helps users organize immigration-related
+information for processes in the United States.
 
+Begin by asking for the user's name and the country relevant to their
+immigration journey. Then ask about the immigration process they are
+organizing and what they need help tracking.
+
+Do not request sensitive information such as passport numbers, Social
+Security numbers, receipt numbers, A-numbers, or other personal identifiers.
+
+Do not provide legal advice. Instead, provide general information and guidance on organizing immigration-related information and processes.
+"""
 
 def run_model(query: str) -> str:
     """
-    Run the model with the provided transcript and video URL, returning the model's response.
+    Send a user message to Groq's chat model and return the assistant's response.
     """
     client = _get_groq_client()
-    # session = new_session(transcript, video_url)
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
             {
                 "role": "system",
-                "content": f"""Use the following system prompt to guide the model's behavior: {SYSTEM_PROMPT}. You are to provide detailed and accurate information to organize immigration with in the US.
-             
-             """,
+                "content": SYSTEM_PROMPT,
             },
-            {"role": "user", "content": query},
+            {
+                "role": "user", 
+                "content": query,
+            },
         ],
     )
 
