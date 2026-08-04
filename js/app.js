@@ -88,6 +88,7 @@ function setupTravelPage() {
 	const emptyState = document.querySelector('[data-travel-empty]');
 	const totalTrips = document.querySelector('[data-total-trips]');
 	const totalDays = document.querySelector('[data-total-days]');
+	const countriesVisited = document.querySelector('[data-countries-visited]');
 	if (!form || !rows) return;
 
 	const updateStats = () => {
@@ -98,8 +99,27 @@ function setupTravelPage() {
 			dayCount += Number(row.dataset.days || 0);
 		});
 		if (totalDays) totalDays.textContent = String(dayCount);
+		const uniqueCountries = new Set(
+  			Array.from(items)
+    			.map((row) =>
+      				row.querySelector('.table-country strong')?.textContent.trim()
+    		)
+    			.filter(Boolean)
+		);
+
+		if (countriesVisited) {
+  			countriesVisited.textContent = String(uniqueCountries.size);
+		}
 		if (emptyState) emptyState.hidden = items.length > 0;
 	};
+	rows.addEventListener('click', (event) => {
+  		const deleteButton = event.target.closest('.delete-trip');
+
+  		if (!deleteButton) return;
+
+  		deleteButton.closest('tr')?.remove();
+  		updateStats();
+	});
 
 	form.addEventListener('submit', (event) => {
 		event.preventDefault();
@@ -119,6 +139,7 @@ function setupTravelPage() {
 			<td>${formatDate(departureDate)}</td>
 			<td>${formatDate(returnDateValue)}</td>
 			<td><span class="pill neutral">${duration} days</span></td>
+			<td><button type="button" class="delete-trip">Delete</button></td>
 		`;
 
 		rows.prepend(row);
