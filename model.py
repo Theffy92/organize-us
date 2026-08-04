@@ -16,24 +16,67 @@ def _get_groq_client():
 
 
 SYSTEM_PROMPT = """
-You are a helpful assistant that helps users organize immigration-related
-information for processes in the United States.
+You are the AI onboarding guide for OrganizeUS, an immigration
+organization application.
 
-Begin by asking for the user's name and the country relevant to their
-immigration journey. Then ask about the immigration process they are
-organizing and what they need help tracking.
+Your role is to guide users through a short onboarding flow so the
+application can personalize their checklist and organization tools.
 
-Do not request sensitive information such as passport numbers, Social
-Security numbers, receipt numbers, A-numbers, or other personal identifiers.
-
-Do not provide legal advice. Instead, provide general information and guidance on organizing immigration-related information and processes.
+Rules:
+- Keep responses brief and friendly.
+- Ask only one question at a time.
+- Do not provide legal advice.
+- Do not determine eligibility.
+- Do not request sensitive identifiers such as Social Security numbers,
+passport numbers, A-numbers, or receipt numbers.
+- The prototype currently supports Permanent Residency, Naturalization,
+and F-1 Student Visa.
 """
+def build_onboarding_prompt(step: str, profile: dict) -> str:
+    """Create the prompt for the current onboarding transition."""
+    name = profile.get("name", "").strip()
+    country = profile.get("country", "").strip()
+    process = profile.get("immigrationProcess", "").strip()
 
-def run_model(query: str) -> str:
-    """
-    Send a user message to Groq's chat model and return the assistant's response.
-    """
+    process_labels = {
+        "permanent-residency": "Permanent Residency",
+        "naturalization": "Naturalization",
+        "f1-visa": "F-1 Student Visa",
+    }
+
+    if step == "name-completed":
+        return (
+            f"The user's profile name is {name}. "
+            "Briefly greet them by name and ask which country is relevant "
+            "to their U.S. immigration journey."
+        )
+
+    if step == "country-completed":
+        return (
+            f"The user's name is {name}, and the country relevant to their "
+            f"immigration journey is {country}. Briefly acknowledge their "
+            "answer and ask which immigration process they are organizing. "
+            "Mention that the available options are Permanent Residency, "
+            "Naturalization, and F-1 Student Visa."
+        )
+
+    if step == "process-completed":
+        selected_process = process_labels.get(process, process)
+
+        return (
+            f"The user's name is {name}, the relevant country is {country}, "
+            f"and they selected {selected_process}. Confirm their selection "
+            "in one or two short sentences. Explain that OrganizeUS will "
+            "prepare a personalized checklist and organization tools."
+        )
+
+    raise ValueError("Unsupported onboarding step.")
+
+
+def run_onboarding_model(step: str, profile: dict) -> str:
+    """Generate the AI message for an onboarding transition."""
     client = _get_groq_client()
+    user_prompt = build_onboarding_prompt(step, profile)
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -43,13 +86,11 @@ def run_model(query: str) -> str:
                 "content": SYSTEM_PROMPT,
             },
             {
-                "role": "user", 
-                "content": query,
+                "role": "user",
+                "content": user_prompt,
             },
         ],
     )
 
     return response.choices[0].message.content
 
-# testing
-# print(run_model("Hello, I am looking for information on how to organize my immigration process in the US. Can you help me with that?"))
