@@ -185,10 +185,6 @@ function setupDocumentsPage() {
 }
 
 function setupOnboarding() {
-	const input = document.getElementById('chat-input');
-	const send = document.getElementById('chat-send');
-	const chat = document.querySelector('.chat-stream');
-
 	const steps = Array.from(
 		document.querySelectorAll('[data-onboarding-step]')
 	);
@@ -213,9 +209,57 @@ function setupOnboarding() {
 		'[data-onboarding-finish]'
 	);
 
+	const loadingMessage = document.querySelector(
+		'[data-ai-loading]'
+	);
+
 	if (!steps.length) return;
 
 	let stepIndex = 0;
+
+	const onboardingData = {
+		name: '',
+		country: '',
+		immigrationProcess: ''
+	};
+
+	const processLabels = {
+		'permanent-residency': 'Permanent Residency',
+		naturalization: 'Naturalization',
+		'f1-visa': 'F-1 Student Visa'
+	};
+
+	const requestAiMessage = async (message) => {
+		const response = await fetch(
+			'https://organize-us-api.onrender.com/chat',
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ 
+					step,
+					profile: onboardingData
+				})
+			}
+		);
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			throw new Error(
+				data.error || 'The AI assistant request failed.'
+			);
+		}
+
+		if (!data.response) {
+			throw new Error(
+				'The AI assistant returned an empty response.'
+			);
+		}
+
+		return data.response;
+	};
 
 	const render = () => {
 		steps.forEach((step, index) => {
@@ -250,15 +294,17 @@ function setupOnboarding() {
 	steps.forEach((step) => {
 		step.querySelectorAll('[data-choice]').forEach((choice) => {
 			choice.addEventListener('click', () => {
-				const group = choice.closest('[data-choice-group]');
+				const group = choice.closest(
+					'[data-choice-group]'
+				);
 
 				if (!group) return;
 
-				group
-					.querySelectorAll('.choice')
-					.forEach((button) => {
+				group.querySelectorAll('.choice').forEach(
+					(button) => {
 						button.classList.remove('active');
-					});
+					}
+				);
 
 				choice.classList.add('active');
 
@@ -270,7 +316,9 @@ function setupOnboarding() {
 				);
 
 				if (field) {
-					field.value = choice.textContent.trim();
+					field.value =
+						choice.dataset.value ||
+						choice.textContent.trim();
 				}
 			});
 		});
@@ -280,106 +328,173 @@ function setupOnboarding() {
 		backButton.addEventListener('click', () => {
 			if (stepIndex > 0) {
 				stepIndex -= 1;
+				render();
 			}
-
-			render();
 		});
 	}
 
 	if (nextButton) {
-		nextButton.addEventListener('click', () => {
-			if (stepIndex < steps.length - 1) {
-				stepIndex += 1;
-			}
+		nextButton.addEventListener('click', async () => {
+			const currentStep = steps[stepIndex];
 
-			render();
+			try {
+				nextButton.disabled = true;
+
+				if (loadingMessage) {
+					loadingMessage.hidden = false;
+				}
+
+				if (stepIndex === 0) {
+					const nameInput = currentStep.querySelector(
+						'[name="profileName"]'
+					);
+
+					const name = nameInput?.value.trim();
+
+					if (!name) {
+						alert('Please enter a profile name.');
+						return;
+					}
+
+					onboardingData.name = name;
+
+					const aiMessage = await requestAiMessage(
+						'name-completed'
+					);
+
+					const countryMessage =
+						document.querySelector(
+							'[data-ai-country-message]'
+						);
+
+					if (countryMessage) {
+						countryMessage.textContent = aiMessage;
+					}
+				}
+
+				if (stepIndex === 1) {
+					const countryInput =
+						currentStep.querySelector(
+							'[name="country"]'
+						);
+
+					const country =
+						countryInput?.value.trim();
+
+					if (!country) {
+						alert('Please enter a country.');
+						return;
+					}
+
+					onboardingData.country = country;
+
+					const aiMessage = await requestAiMessage(
+						'country-completed'
+					);
+
+					const processMessage =
+						document.querySelector(
+							'[data-ai-process-message]'
+						);
+
+					if (processMessage) {
+						processMessage.textContent = aiMessage;
+					}
+				}
+
+				if (stepIndex === 2) {
+					const processInput =
+						currentStep.querySelector(
+							'[name="immigrationProcess"]'
+						);
+
+					const processValue =
+						processInput?.value;
+
+					if (!processValue) {
+						alert(
+							'Please select an immigration process.'
+						);
+						return;
+					}
+
+					onboardingData.immigrationProcess =
+						processValue;
+
+					const selectedProcess =
+						processLabels[processValue];
+
+					const aiMessage = await requestAiMessage(
+						'process-completed'
+					);
+
+					const confirmationMessage =
+						document.querySelector(
+							'[data-ai-confirmation-message]'
+						);
+
+					if (confirmationMessage) {
+						confirmationMessage.textContent =
+							aiMessage;
+					}
+
+					const reviewName =
+						document.querySelector(
+							'[data-review-name]'
+						);
+
+					const reviewCountry =
+						document.querySelector(
+							'[data-review-country]'
+						);
+
+					const reviewProcess =
+						document.querySelector(
+							'[data-review-process]'
+						);
+
+					if (reviewName) {
+						reviewName.textContent =
+							onboardingData.name;
+					}
+
+					if (reviewCountry) {
+						reviewCountry.textContent =
+							onboardingData.country;
+					}
+
+					if (reviewProcess) {
+						reviewProcess.textContent =
+							selectedProcess;
+					}
+				}
+
+				if (stepIndex < steps.length - 1) {
+					stepIndex += 1;
+					render();
+				}
+			} catch (error) {
+				console.error(error);
+
+				alert(
+					'The AI assistant is temporarily unavailable. ' +
+					'Please try again.'
+				);
+			} finally {
+				nextButton.disabled = false;
+
+				if (loadingMessage) {
+					loadingMessage.hidden = true;
+				}
+			}
 		});
 	}
 
 	if (finishButton) {
 		finishButton.addEventListener('click', () => {
+			console.log('Completed onboarding:', onboardingData);
+
 			window.location.href = 'dashboard.html';
-		});
-	}
-
-	const addMessage = (text, role) => {
-		if (!chat) return;
-
-		const row = document.createElement('div');
-		row.className = `chat-row ${role}`;
-
-		const bubble = document.createElement('div');
-		bubble.className = 'bubble';
-		bubble.textContent = text;
-
-		row.appendChild(bubble);
-		chat.appendChild(row);
-
-		chat.scrollTop = chat.scrollHeight;
-	};
-
-	const sendMessage = async () => {
-		if (!input || !send || !chat) return;
-
-		const message = input.value.trim();
-
-		if (!message) return;
-
-		addMessage(message, 'user');
-
-		input.value = '';
-		send.disabled = true;
-
-		try {
-			const response = await fetch(
-				'https://organize-us-api.onrender.com/chat',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						message
-					})
-				}
-			);
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(
-					data.error || 'The request failed.'
-				);
-			}
-
-			if (!data.response) {
-				throw new Error(
-					'The assistant returned an empty response.'
-				);
-			}
-
-			addMessage(data.response, 'assistant');
-		} catch (error) {
-			console.error(error);
-
-			addMessage(
-				'The assistant is temporarily unavailable. Please try again.',
-				'assistant'
-			);
-		} finally {
-			send.disabled = false;
-			input.focus();
-		}
-	};
-
-	if (input && send && chat) {
-		send.addEventListener('click', sendMessage);
-
-		input.addEventListener('keydown', (event) => {
-			if (event.key === 'Enter') {
-				event.preventDefault();
-				sendMessage();
-			}
 		});
 	}
 

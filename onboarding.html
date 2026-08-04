@@ -10,96 +10,292 @@
 
 <body data-page="onboarding" class="onboarding-page">
 	<main class="onboarding-shell">
-		<div class="app-topbar" style="padding-top:0;">
-			<a class="brand" href="index.html"><span class="brand-mark"
-					aria-hidden="true">O</span><span>OrganizeUS</span></a>
-			<a class="btn-ghost" href="index.html">Back to home</a>
+		<div class="app-topbar" style="padding-top: 0;">
+			<a class="brand" href="index.html">
+				<span class="brand-mark" aria-hidden="true">O</span>
+				<span>OrganizeUS</span>
+			</a>
+
+			<a class="btn-ghost" href="index.html">
+				Back to home
+			</a>
 		</div>
 
-		<section class="onboarding-card" aria-labelledby="onboarding-title">
+		<section
+			class="onboarding-card"
+			aria-labelledby="onboarding-title"
+		>
 			<div class="assistant-header">
 				<div class="assistant-name">
-					<span class="assistant-avatar" aria-hidden="true">★</span>
+					<span class="assistant-avatar" aria-hidden="true">
+						★
+					</span>
+
 					<div>
-						<div id="onboarding-title">AI Organizer</div>
-						<div class="assistant-status">● Static prototype</div>
+						<div id="onboarding-title">
+							OrganizeUS AI
+						</div>
+
+						<div class="assistant-status">
+							● AI-guided onboarding
+						</div>
 					</div>
 				</div>
-				<div class="step-pill">Step <span data-step-indicator>1 of 3</span></div>
+
+				<div class="step-pill">
+					Step
+					<span data-step-indicator>1 of 4</span>
+				</div>
 			</div>
+
 			<div class="assistant-body">
 				<div class="progress-header">
 					<div>
-						<div class="progress-label">Onboarding progress</div>
-						<div class="progress-track" aria-hidden="true">
-							<div class="progress-bar purple" data-onboarding-progress style="width:33%"></div>
+						<div class="progress-label">
+							Onboarding progress
+						</div>
+
+						<div
+							class="progress-track"
+							aria-hidden="true"
+						>
+							<div
+								class="progress-bar purple"
+								data-onboarding-progress
+								style="width: 25%;"
+							></div>
 						</div>
 					</div>
-					<span class="status-tag success">Guided flow</span>
+
+					<span class="status-tag success">
+						Personalized flow
+					</span>
 				</div>
 
 				<div class="chat-stream">
-					<div class="onboarding-step" data-onboarding-step>
-						<div class="chat-row">
-							<div class="bubble">Hi! I&apos;ll help you organize your immigration information.</div>
+					<!-- Step 1: Welcome and name -->
+					<div
+						class="onboarding-step"
+						data-onboarding-step
+						data-step-name="name"
+					>
+						<div class="chat-row assistant">
+							<div class="bubble">
+								Hi! I’m your OrganizeUS AI assistant.
+								I’ll guide you through a few questions so
+								I can personalize your checklist and
+								organization tools.
+							</div>
 						</div>
-						<div class="chat-row">
-							<div class="bubble">What name should we use for your profile?</div>
+
+						<div class="chat-row assistant">
+							<div class="bubble">
+								What name should I use for your profile?
+							</div>
 						</div>
+
 						<label class="field-group" for="profile-name">
-							<span class="field-label">Profile name</span>
-							<input id="profile-name" name="profileName" type="text" placeholder="Meron" value="Meron">
+							<span class="field-label">
+								Profile name
+							</span>
+
+							<input
+								id="profile-name"
+								name="profileName"
+								type="text"
+								placeholder="Enter your first name"
+								autocomplete="given-name"
+								required
+							>
 						</label>
 					</div>
 
-					<div class="onboarding-step" data-onboarding-step hidden>
-						<div class="chat-row">
-							<div class="bubble">When did you first enter the United States?</div>
+					<!-- Step 2: Country -->
+					<div
+						class="onboarding-step"
+						data-onboarding-step
+						data-step-name="country"
+						hidden
+					>
+						<div class="chat-row assistant">
+							<div
+								class="bubble"
+								data-ai-country-message
+							>
+								Thanks! Which country is relevant to
+								your immigration journey?
+							</div>
 						</div>
-						<label class="field-group" for="first-entry">
-							<span class="field-label">First entry date</span>
-							<input id="first-entry" name="firstEntry" type="month" value="2020-08">
-						</label>
-						<label class="field-group" for="entry-notes">
-							<span class="field-label">Notes</span>
-							<textarea id="entry-notes" name="entryNotes" rows="3"
-								placeholder="Add a reminder or note for your own records"></textarea>
+
+						<label class="field-group" for="country">
+							<span class="field-label">
+								Country
+							</span>
+
+							<input
+								id="country"
+								name="country"
+								type="text"
+								placeholder="For example, Argentina"
+								autocomplete="country-name"
+								required
+							>
 						</label>
 					</div>
 
-					<div class="onboarding-step" data-onboarding-step hidden>
-						<div class="chat-row">
-							<div class="bubble">Great. Have you traveled outside the U.S. since then?</div>
+					<!-- Step 3: Immigration process -->
+					<div
+						class="onboarding-step"
+						data-onboarding-step
+						data-step-name="process"
+						hidden
+					>
+						<div class="chat-row assistant">
+							<div
+								class="bubble"
+								data-ai-process-message
+							>
+								Now, which immigration process are you
+								organizing?
+							</div>
 						</div>
-						<div class="step-choices" data-choice-group>
-							<button type="button" class="choice active" data-choice
-								data-field="travelStatus">Yes</button>
-							<button type="button" class="choice" data-choice data-field="travelStatus">No</button>
+
+						<p class="field-help">
+							OrganizeUS currently supports these three
+							paths.
+						</p>
+
+						<div
+							class="step-choices"
+							data-choice-group
+						>
+							<button
+								type="button"
+								class="choice"
+								data-choice
+								data-field="immigrationProcess"
+								data-value="permanent-residency"
+							>
+								Permanent Residency
+							</button>
+
+							<button
+								type="button"
+								class="choice"
+								data-choice
+								data-field="immigrationProcess"
+								data-value="naturalization"
+							>
+								Naturalization
+							</button>
+
+							<button
+								type="button"
+								class="choice"
+								data-choice
+								data-field="immigrationProcess"
+								data-value="f1-visa"
+							>
+								F-1 Student Visa
+							</button>
 						</div>
-						<label class="field-group" for="travel-comment">
-							<span class="field-label">Comment</span>
-							<input id="travel-comment" name="travelStatus" type="text" value="Yes" placeholder="Yes">
-						</label>
-						<div class="chat-row">
-							<div class="bubble">Perfect - we&apos;ll add those trips next.</div>
+
+						<input
+							id="immigration-process"
+							name="immigrationProcess"
+							type="hidden"
+							required
+						>
+					</div>
+
+					<!-- Step 4: AI confirmation -->
+					<div
+						class="onboarding-step"
+						data-onboarding-step
+						data-step-name="confirmation"
+						hidden
+					>
+						<div class="chat-row assistant">
+							<div
+								class="bubble"
+								data-ai-confirmation-message
+							>
+								Great! I have enough information to begin
+								personalizing your OrganizeUS experience.
+							</div>
 						</div>
+
+						<div class="chat-row assistant">
+							<div class="bubble">
+								I’ll use your selected process to prepare
+								the most relevant checklist, document
+								tracker, and organization tools.
+							</div>
+						</div>
+
+						<div class="onboarding-review">
+							<p>
+								<strong>Name:</strong>
+								<span data-review-name>
+									Not provided
+								</span>
+							</p>
+
+							<p>
+								<strong>Country:</strong>
+								<span data-review-country>
+									Not provided
+								</span>
+							</p>
+
+							<p>
+								<strong>Immigration process:</strong>
+								<span data-review-process>
+									Not selected
+								</span>
+							</p>
+						</div>
+						<button
+							class="btn-success"
+							type="button"
+							data-onboarding-finish
+							hidden
+						>
+							Create My Plan →
+						</button>
 					</div>
 				</div>
 
-				<div class="input-row">
-					<input id="chat-input" type="text" placeholder="Type a message...">
-					<button id="chat-send" class="btn-secondary" type="button">Send →</button>
+				<div
+					class="assistant-loading"
+					data-ai-loading
+					hidden
+					aria-live="polite"
+				>
+					OrganizeUS AI is preparing the next step…
 				</div>
 
 				<div class="onboarding-actions">
-					<button class="btn-secondary" type="button" data-onboarding-back>Back</button>
-					<button class="btn" type="button" data-onboarding-next>Continue</button>
-					<button class="btn-success" type="button" data-onboarding-finish hidden>Continue to Dashboard
-						→</button>
+					<button
+						class="btn-secondary"
+						type="button"
+						data-onboarding-back
+					>
+						Back
+					</button>
+
+					<button
+						class="btn"
+						type="button"
+						data-onboarding-next
+					>
+						Continue
+					</button>
 				</div>
 			</div>
 		</section>
 	</main>
+
 	<script src="js/app.js"></script>
 </body>
 

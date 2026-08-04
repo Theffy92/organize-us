@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from model import run_model
+from model import run_onboarding_model
 
 app = Flask(__name__)
 CORS(app,
@@ -21,26 +21,32 @@ def health():
 
 @app.post("/chat")
 def chat():
-    """Receives a message from the user, processes it using the model, and returns the model's response."""
+    """Generate the next AI-guided onboarding message."""
     data = request.get_json(silent=True) or {}
-    message = data.get("message")
 
-    if not isinstance(message, str) or not message.strip():
-        return jsonify({"error": "Invalid input. Please provide a non-empty message."}), 400
+    step = data.get("step")
+    profile = data.get("profile")
 
-    message = message.strip()
+    if not isinstance(step, str) or not step.strip():
+        return jsonify({"error": "A valid onboarding step is required."}), 400
 
-    if len(message) > 2000:
-        return jsonify({"error": "Input message is too long. Please limit to 2000 characters."}), 400
+    if not isinstance(profile, dict):
+        return jsonify({"error": "A valid profile object is required."}), 400
 
     try:
-        reply = run_model(message)
+        reply = run_onboarding_model(step.strip(), profile)
         return jsonify({"response": reply})
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
     except Exception:
         app.logger.exception("The Groq API request failed.")
+
         return jsonify(
             {
-                "error": "The assistant is temporarily unavailable. Please try again later."
+                "error": (
+                    "The assistant is temporarily unavailable. "
+                    "Please try again later."
+                )
             }
         ), 500
 
