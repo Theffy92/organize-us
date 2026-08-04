@@ -229,7 +229,7 @@ function setupOnboarding() {
 		'f1-visa': 'F-1 Student Visa'
 	};
 
-	const requestAiMessage = async (message) => {
+	const requestAiMessage = async (step) => {
 		const response = await fetch(
 			'https://organize-us-api.onrender.com/chat',
 			{
