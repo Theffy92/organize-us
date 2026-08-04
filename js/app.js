@@ -185,15 +185,34 @@ function setupDocumentsPage() {
 }
 
 function setupOnboarding() {
-	const input = document.getElementById("chat-input");
-	const send = document.getElementById("chat-send");
-	const chat = document.querySelector(".chat-stream");
-	const steps = Array.from(document.querySelectorAll('[data-onboarding-step]'));
-	const progressBar = document.querySelector('[data-onboarding-progress]');
-	const stepIndicator = document.querySelector('[data-step-indicator]');
-	const backButton = document.querySelector('[data-onboarding-back]');
-	const nextButton = document.querySelector('[data-onboarding-next]');
-	const finishButton = document.querySelector('[data-onboarding-finish]');
+	const input = document.getElementById('chat-input');
+	const send = document.getElementById('chat-send');
+	const chat = document.querySelector('.chat-stream');
+
+	const steps = Array.from(
+		document.querySelectorAll('[data-onboarding-step]')
+	);
+
+	const progressBar = document.querySelector(
+		'[data-onboarding-progress]'
+	);
+
+	const stepIndicator = document.querySelector(
+		'[data-step-indicator]'
+	);
+
+	const backButton = document.querySelector(
+		'[data-onboarding-back]'
+	);
+
+	const nextButton = document.querySelector(
+		'[data-onboarding-next]'
+	);
+
+	const finishButton = document.querySelector(
+		'[data-onboarding-finish]'
+	);
+
 	if (!steps.length) return;
 
 	let stepIndex = 0;
@@ -202,37 +221,77 @@ function setupOnboarding() {
 		steps.forEach((step, index) => {
 			step.hidden = index !== stepIndex;
 		});
-		if (progressBar) progressBar.style.width = `${((stepIndex + 1) / steps.length) * 100}%`;
-		if (stepIndicator) stepIndicator.textContent = `${stepIndex + 1} of ${steps.length}`;
-		if (backButton) backButton.disabled = stepIndex === 0;
-		if (nextButton) nextButton.hidden = stepIndex === steps.length - 1;
-		if (finishButton) finishButton.hidden = stepIndex !== steps.length - 1;
+
+		if (progressBar) {
+			progressBar.style.width =
+				`${((stepIndex + 1) / steps.length) * 100}%`;
+		}
+
+		if (stepIndicator) {
+			stepIndicator.textContent =
+				`${stepIndex + 1} of ${steps.length}`;
+		}
+
+		if (backButton) {
+			backButton.disabled = stepIndex === 0;
+		}
+
+		if (nextButton) {
+			nextButton.hidden =
+				stepIndex === steps.length - 1;
+		}
+
+		if (finishButton) {
+			finishButton.hidden =
+				stepIndex !== steps.length - 1;
+		}
 	};
 
 	steps.forEach((step) => {
 		step.querySelectorAll('[data-choice]').forEach((choice) => {
 			choice.addEventListener('click', () => {
 				const group = choice.closest('[data-choice-group]');
+
 				if (!group) return;
-				group.querySelectorAll('.choice').forEach((button) => button.classList.remove('active'));
+
+				group
+					.querySelectorAll('.choice')
+					.forEach((button) => {
+						button.classList.remove('active');
+					});
+
 				choice.classList.add('active');
-				const fieldName = choice.getAttribute('data-field');
-				const field = step.querySelector(`[name="${fieldName}"]`);
-				if (field) field.value = choice.textContent.trim();
+
+				const fieldName =
+					choice.getAttribute('data-field');
+
+				const field = step.querySelector(
+					`[name="${fieldName}"]`
+				);
+
+				if (field) {
+					field.value = choice.textContent.trim();
+				}
 			});
 		});
 	});
 
 	if (backButton) {
 		backButton.addEventListener('click', () => {
-			if (stepIndex > 0) stepIndex -= 1;
+			if (stepIndex > 0) {
+				stepIndex -= 1;
+			}
+
 			render();
 		});
 	}
 
 	if (nextButton) {
 		nextButton.addEventListener('click', () => {
-			if (stepIndex < steps.length - 1) stepIndex += 1;
+			if (stepIndex < steps.length - 1) {
+				stepIndex += 1;
+			}
+
 			render();
 		});
 	}
@@ -240,6 +299,87 @@ function setupOnboarding() {
 	if (finishButton) {
 		finishButton.addEventListener('click', () => {
 			window.location.href = 'dashboard.html';
+		});
+	}
+
+	const addMessage = (text, role) => {
+		if (!chat) return;
+
+		const row = document.createElement('div');
+		row.className = `chat-row ${role}`;
+
+		const bubble = document.createElement('div');
+		bubble.className = 'bubble';
+		bubble.textContent = text;
+
+		row.appendChild(bubble);
+		chat.appendChild(row);
+
+		chat.scrollTop = chat.scrollHeight;
+	};
+
+	const sendMessage = async () => {
+		if (!input || !send || !chat) return;
+
+		const message = input.value.trim();
+
+		if (!message) return;
+
+		addMessage(message, 'user');
+
+		input.value = '';
+		send.disabled = true;
+
+		try {
+			const response = await fetch(
+				'https://organize-us-api.onrender.com/chat',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						message
+					})
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(
+					data.error || 'The request failed.'
+				);
+			}
+
+			if (!data.response) {
+				throw new Error(
+					'The assistant returned an empty response.'
+				);
+			}
+
+			addMessage(data.response, 'assistant');
+		} catch (error) {
+			console.error(error);
+
+			addMessage(
+				'The assistant is temporarily unavailable. Please try again.',
+				'assistant'
+			);
+		} finally {
+			send.disabled = false;
+			input.focus();
+		}
+	};
+
+	if (input && send && chat) {
+		send.addEventListener('click', sendMessage);
+
+		input.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				sendMessage();
+			}
 		});
 	}
 
@@ -264,46 +404,4 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupDocumentsPage();
 	setupOnboarding();
 	setupScoreRings();
-});
-
-
-// to display the message in the chat stream
-function addMessage(text) {
-    const row = document.createElement("div");
-    row.className = "chat-row";
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.textContent = text;
-
-    row.appendChild(bubble);
-    chat.appendChild(row);
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-// makes sure went "Send" it clicked
-send.addEventListener("click", async () => {
-
-    const message = input.value.trim();
-
-    if (!message) return;
-
-    addMessage(message); // show user's message
-
-    input.value = "";
-
-    const response = await fetch("https://YOUR-BACKEND-URL/chat", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: message
-        })
-    });
-
-    const data = await response.json();
-
-    addMessage(data.response); // show AI reply
 });
