@@ -300,46 +300,161 @@ function setupDocumentsPage() {
 	const form = document.querySelector('[data-document-form]');
 	const grid = document.querySelector('[data-document-grid]');
 	const emptyState = document.querySelector('[data-document-empty]');
-	const totalDocuments = document.querySelector('[data-total-documents]');
-	if (!form || !grid) return;
+	const totalDocuments = document.querySelector(
+		'[data-total-documents]'
+	);
+	const completedDocuments = document.querySelector(
+		'[data-documents-complete]'
+	);
+	const missingDocuments = document.querySelector(
+		'[data-documents-missing]'
+	);
 
-	const updateStats = () => {
-		const cards = grid.querySelectorAll('[data-document-card]');
-		if (totalDocuments) totalDocuments.textContent = String(cards.length);
-		if (emptyState) emptyState.hidden = cards.length > 0;
+	if (!grid) return;
+
+	const renderDocuments = () => {
+		const appData = getAppData();
+		const documents = appData.documents;
+
+		grid.innerHTML = '';
+
+		documents.forEach((documentItem) => {
+			const card = document.createElement('article');
+
+			card.className = 'document-card';
+			card.dataset.documentCard = 'true';
+
+			if (!documentItem.completed) {
+				card.classList.add('danger');
+			}
+
+			card.innerHTML = `
+				<div class="doc-icon">${svg('file')}</div>
+				<h3>${documentItem.name}</h3>
+				<p>
+					${documentItem.completed
+						? 'This document is marked as organized.'
+						: 'This document still needs attention.'
+					}
+				</p>
+				<button
+					type="button"
+					class="pill ${
+						documentItem.completed
+							? 'success'
+							: 'danger'
+					}"
+					data-document-toggle
+					data-document-id="${documentItem.id}"
+				>
+					${documentItem.completed
+						? 'On file'
+						: 'Missing'
+					}
+				</button>
+			`;
+
+			grid.appendChild(card);
+		});
+
+		const completeCount = documents.filter(
+			(documentItem) => documentItem.completed
+		).length;
+
+		const missingCount =
+			documents.length - completeCount;
+
+		if (totalDocuments) {
+			totalDocuments.textContent =
+				String(documents.length);
+		}
+
+		if (completedDocuments) {
+			completedDocuments.textContent =
+				String(completeCount);
+		}
+
+		if (missingDocuments) {
+			missingDocuments.textContent =
+				String(missingCount);
+		}
+
+		if (emptyState) {
+			emptyState.hidden = documents.length > 0;
+		}
 	};
 
-	form.addEventListener('submit', (event) => {
-		event.preventDefault();
-		const name = form.elements.name.value.trim();
-		const status = form.elements.status.value;
-		const location = form.elements.location.value.trim();
-		const expiry = form.elements.expiry.value.trim();
-		if (!name) return;
+	grid.addEventListener('click', (event) => {
+		const toggleButton = event.target.closest(
+			'[data-document-toggle]'
+		);
 
-		const card = document.createElement('article');
-		card.className = 'document-card';
-		card.dataset.documentCard = 'true';
-		if (status === 'Missing') card.classList.add('danger');
-		card.innerHTML = `
-			<div class="doc-icon">${svg('file')}</div>
-			<h3>${name}</h3>
-			${expiry ? `<p>Expires: ${expiry}</p>` : '<p>Expires: Not specified</p>'}
-			${location ? `<p>Stored: ${location}</p>` : '<p>Stored: Not specified</p>'}
-			<span class="pill ${status === 'Missing' ? 'danger' : status === 'Expiring soon' ? 'warning' : 'success'}">${status}</span>
-		`;
+		if (!toggleButton) return;
 
-		grid.prepend(card);
-		form.reset();
-		updateStats();
-		const backdrop = document.querySelector('[data-modal-backdrop]');
-		if (backdrop) {
-			backdrop.classList.remove('open');
-			backdrop.setAttribute('aria-hidden', 'true');
-		}
+		const documentId =
+			toggleButton.dataset.documentId;
+
+		const appData = getAppData();
+
+		const documentItem = appData.documents.find(
+			(item) => item.id === documentId
+		);
+
+		if (!documentItem) return;
+
+		documentItem.completed = !documentItem.completed;
+		documentItem.status = documentItem.completed
+			? 'On file'
+			: 'Missing';
+
+		saveAppData(appData);
+		renderDocuments();
 	});
 
-	updateStats();
+	if (form) {
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+
+			const appData = getAppData();
+
+			const name = form.elements.name.value.trim();
+			const status = form.elements.status.value;
+			const location =
+				form.elements.location.value.trim();
+			const expiry =
+				form.elements.expiry.value.trim();
+
+			if (!name) return;
+
+			appData.documents.push({
+				id: crypto.randomUUID(),
+				name,
+				status,
+				completed: status === 'On file',
+				location,
+				expiry
+			});
+
+			saveAppData(appData);
+
+			form.reset();
+			renderDocuments();
+
+			const backdrop = document.querySelector(
+				'[data-modal-backdrop]'
+			);
+
+			if (backdrop) {
+				backdrop.classList.remove('open');
+				backdrop.setAttribute(
+					'aria-hidden',
+					'true'
+				);
+			}
+		});
+	}
+
+	renderDocuments();
 }
 
 function setupOnboarding() {
