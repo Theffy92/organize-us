@@ -11,7 +11,7 @@
 		<div class="topbar-inner">
 			<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span><span>OrganizeUS</span></a>
 			<button class="mobile-nav-toggle" data-sidebar-toggle aria-label="Toggle navigation" aria-expanded="false"></button>
-			<div class="header-actions"><span class="muted-pill"><span class="assistant-avatar" aria-hidden="true">M</span> Meron</span></div>
+			<div class="header-actions"><span class="muted-pill"><span class="assistant-avatar" aria-hidden="true" data-profile-initial>P</span><span data-profile-name>Profile</span></span></div>
 		</div>
 	</header>
 
@@ -43,11 +43,11 @@
 					<div class="summary-row">
 						<div>
 							<div class="progress-label">Organizational completion score</div>
-							<div class="big-number">80%</div>
+							<div class="big-number" data-dashboard-score-value>0%</div>
 						</div>
 						<span class="status-tag success">On Track</span>
 					</div>
-					<div class="progress-line" aria-hidden="true"><div class="progress-bar green" style="width:80%"></div></div>
+					<div class="progress-line" aria-hidden="true"><div class="progress-bar green" data-dashboard-score-bar style="width:0%"></div></div>
 					<div class="quick-action-grid" style="margin-top:18px;">
 						<div class="page-card"><strong>Complete</strong><p>Travel History</p></div>
 						<div class="page-card"><strong>Complete</strong><p>Documents</p></div>
@@ -61,8 +61,22 @@
 					<div class="info-grid" style="margin-top:16px; grid-template-columns: 1fr;">
 						<div class="info-row"><span>Total trips abroad</span><strong>4</strong></div>
 						<div class="info-row"><span>Days outside U.S.</span><strong>53</strong></div>
-						<div class="info-row"><span>Documents tracked</span><strong>3</strong></div>
-						<div class="info-row"><span>Organizational progress</span><strong>86%</strong></div>
+						<div class="info-row">
+							<span>Documents tracked</span>
+							<strong data-dashboard-total-documents>0</strong>
+						</div>
+						<div class="info-row">
+	                        <span>Documents completed</span>
+	                        <strong data-dashboard-completed-documents>0</strong>
+						</div>
+						<div class="info-row">
+	                    	<span>Documents remaining</span>
+	                        <strong data-dashboard-remaining-documents>0</strong>
+                        </div>
+                        <div class="info-row">
+	                        <span>Organizational progress</span>
+	                        <strong data-dashboard-progress>0%</strong>
+                        </div>
 					</div>
 				</article>
 			</section>

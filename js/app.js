@@ -796,29 +796,131 @@ function setupScoreRings() {
 	});
 }
 
-function setupDashboard() {
-	const nameElement = document.querySelector('[data-dashboard-name]');
-	const processElement = document.querySelector('[data-dashboard-process]');
+function setupProfileHeader() {
+	const appData = getAppData();
+	const profileName = appData.profile.name.trim();
+	const displayName = profileName || 'Profile';
+	const profileInitial = profileName ? profileName.charAt(0).toUpperCase() : 'P';
 
-	if (!nameElement && !processElement) {
+	document.querySelectorAll('[data-profile-name]').forEach((element) => {
+		element.textContent = displayName;
+	});
+
+	document.querySelectorAll('[data-profile-initial]').forEach((element) => {
+		element.textContent = profileInitial;
+	});
+}
+
+function setupDashboard() {
+	const nameElements = document.querySelectorAll(
+		'[data-dashboard-name]'
+	);
+
+	const processElement = document.querySelector(
+		'[data-dashboard-process]'
+	);
+
+	const totalDocumentsElement = document.querySelector(
+		'[data-dashboard-total-documents]'
+	);
+
+	const completedDocumentsElement = document.querySelector(
+		'[data-dashboard-completed-documents]'
+	);
+
+	const remainingDocumentsElement = document.querySelector(
+		'[data-dashboard-remaining-documents]'
+	);
+
+	const scoreValueElement = document.querySelector(
+		'[data-dashboard-score-value]'
+	);
+
+	const scoreBarElement = document.querySelector(
+		'[data-dashboard-score-bar]'
+	);
+
+	const progressElement = document.querySelector(
+		'[data-dashboard-progress]'
+	);
+
+	if (
+		!nameElements.length &&
+		!processElement &&
+		!totalDocumentsElement &&
+		!completedDocumentsElement &&
+		!remainingDocumentsElement &&
+		!scoreValueElement
+	) {
 		return;
 	}
 
 	const appData = getAppData();
 
-	const processsLabels = {
+	const processLabels = {
 		'permanent-residency': 'Permanent Residency',
 		naturalization: 'Naturalization',
 		'f1-visa': 'F-1 Student Visa'
 	};
 
-	if (nameElement) {
-		nameElement.textContent = appData.profile.name || 'there';
-	}
+	const documents = appData.documents || [];
+
+	const totalDocuments = documents.length;
+
+	const completedDocuments = documents.filter(
+		(documentItem) => documentItem.completed
+	).length;
+
+	const remainingDocuments =
+		totalDocuments - completedDocuments;
+
+	const completionScore =
+		totalDocuments === 0
+			? 0
+			: Math.round(
+					(completedDocuments / totalDocuments) * 100
+				);
+
+	nameElements.forEach((element) => {
+		element.textContent =
+			appData.profile.name || 'there';
+	});
 
 	if (processElement) {
-		const process = appData.profile.immigrationProcess;
-		processElement.textContent = processsLabels[process] || 'Immigration Journey';
+		processElement.textContent =
+			processLabels[
+				appData.profile.immigrationProcess
+			] || 'Immigration Journey';
+	}
+
+	if (totalDocumentsElement) {
+		totalDocumentsElement.textContent =
+			String(totalDocuments);
+	}
+
+	if (completedDocumentsElement) {
+		completedDocumentsElement.textContent =
+			String(completedDocuments);
+	}
+
+	if (remainingDocumentsElement) {
+		remainingDocumentsElement.textContent =
+			String(remainingDocuments);
+	}
+
+	if (scoreValueElement) {
+		scoreValueElement.textContent =
+			`${completionScore}%`;
+	}
+
+	if (scoreBarElement) {
+		scoreBarElement.style.width =
+			`${completionScore}%`;
+	}
+
+	if (progressElement) {
+		progressElement.textContent =
+			`${completionScore}%`;
 	}
 }
 
@@ -835,5 +937,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupDocumentsPage();
 	setupOnboarding();
 	setupDashboard();
+	setupProfileHeader();
 	setupScoreRings();
 });
