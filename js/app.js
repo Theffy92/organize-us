@@ -1070,6 +1070,26 @@ function setupDashboard() {
 	}
 }
 
+function setupDemoReset() {
+	const resetButton = document.querySelector(
+		'[data-reset-demo]'
+	);
+
+	if (!resetButton) return;
+
+	resetButton.addEventListener('click', () => {
+		const confirmed = window.confirm(
+			'Clear all fictional demo data and restart onboarding?'
+		);
+
+		if (!confirmed) return;
+
+		resetAppData();
+
+		window.location.href = 'onboarding.html';
+	});
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 	// // temporary datafor testing
 	// const testData = getAppData();
@@ -1085,4 +1105,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupDashboard();
 	setupProfileHeader();
 	setupScoreRings();
+	setupDemoReset();
 });
