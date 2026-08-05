@@ -61,6 +61,92 @@ function formatDate(date) {
 	return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
 }
 
+function generateChecklist(process) {
+	const checklists = {
+		naturalization: [
+			{
+				id: crypto.randomUUID(),
+				name: 'Permanent Resident Card (Green Card)',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Travel History',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Tax Records',
+				status: 'Missing',
+				completed: false,
+			},
+		],
+
+		'permanent-residency': [
+			{
+				id: crypto.randomUUID(),
+				name: 'Identity Document',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'ValidPassport',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Birth Certificate',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Proof of Residence',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Financial Records',
+				status: 'Missing',
+				completed: false,
+			},
+		],
+
+		'f1-visa': [
+			{
+				id: crypto.randomUUID(),
+				name: 'I-20 Form',
+				status: 'Missing',
+				completed: false,	
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Valid Passport',
+				status: 'Missing',
+				completed: false,
+			},
+			{
+				id: crypto.randomUUID(),
+				name: 'Financial Support Documents',
+				status: 'Missing',
+				completed: false,
+			},	
+			{
+				id: crypto.randomUUID(),
+				name: 'Visa application form (DS-160)',
+				status: 'Missing',
+				completed: false,
+			},
+		],
+	}
+	return checklists[process] || [];
+}
+
 function setActiveNav() {
 	const page = document.body.dataset.page;
 	if (!page) return;
@@ -574,6 +660,8 @@ function setupOnboarding() {
 
 			appData.onboardingCompleted = true;
 
+			appData.documents = generateChecklist(onboardingData.immigrationProcess);
+
 			saveAppData(appData);
 			// console.log('Completed onboarding:', onboardingData);
 
@@ -593,6 +681,32 @@ function setupScoreRings() {
 	});
 }
 
+function setupDashboard() {
+	const nameElement = document.querySelector('[data-dashboard-name]');
+	const processElement = document.querySelector('[data-dashboard-process]');
+
+	if (!nameElement && !processElement) {
+		return;
+	}
+
+	const appData = getAppData();
+
+	const processsLabels = {
+		'permanent-residency': 'Permanent Residency',
+		naturalization: 'Naturalization',
+		'f1-visa': 'F-1 Student Visa'
+	};
+
+	if (nameElement) {
+		nameElement.textContent = appData.profile.name || 'there';
+	}
+
+	if (processElement) {
+		const process = appData.profile.immigrationProcess;
+		processElement.textContent = processsLabels[process] || 'Immigration Journey';
+	}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 	// // temporary datafor testing
 	// const testData = getAppData();
@@ -605,5 +719,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupTravelPage();
 	setupDocumentsPage();
 	setupOnboarding();
+	setupDashboard();
 	setupScoreRings();
 });
