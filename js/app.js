@@ -225,75 +225,183 @@ function setupTravelPage() {
 	const emptyState = document.querySelector('[data-travel-empty]');
 	const totalTrips = document.querySelector('[data-total-trips]');
 	const totalDays = document.querySelector('[data-total-days]');
-	const countriesVisited = document.querySelector('[data-countries-visited]');
-	if (!form || !rows) return;
+	const countriesVisited = document.querySelector(
+		'[data-countries-visited]'
+	);
 
-	const updateStats = () => {
-		const items = rows.querySelectorAll('tr');
-		if (totalTrips) totalTrips.textContent = String(items.length);
-		let dayCount = 0;
-		items.forEach((row) => {
-			dayCount += Number(row.dataset.days || 0);
+	if (!rows) return;
+
+	const calculateDuration = (departure, returnDate) => {
+		const departureDate = new Date(`${departure}T00:00:00`);
+		const returnDateValue = new Date(`${returnDate}T00:00:00`);
+
+		return Math.max(
+			1,
+			Math.round(
+				(returnDateValue - departureDate) / 86400000
+			) + 1
+		);
+	};
+
+	const renderTrips = () => {
+		const appData = getAppData();
+		const trips = appData.trips || [];
+
+		rows.innerHTML = '';
+
+		trips.forEach((trip) => {
+			const row = document.createElement('tr');
+
+			row.dataset.days = String(trip.duration);
+
+			row.innerHTML = `
+				<td>
+					<div class="table-country">
+						<strong>${trip.country}</strong>
+						<span>International</span>
+					</div>
+				</td>
+				<td>
+					${formatDate(
+						new Date(`${trip.departure}T00:00:00`)
+					)}
+				</td>
+				<td>
+					${formatDate(
+						new Date(`${trip.returnDate}T00:00:00`)
+					)}
+				</td>
+				<td>
+					<span class="pill neutral">
+						${trip.duration} days
+					</span>
+				</td>
+				<td>
+					<button
+						type="button"
+						class="delete-trip"
+						data-delete-trip
+						data-trip-id="${trip.id}"
+					>
+						Delete
+					</button>
+				</td>
+			`;
+
+			rows.appendChild(row);
 		});
-		if (totalDays) totalDays.textContent = String(dayCount);
-		const uniqueCountries = new Set(
-  			Array.from(items)
-    			.map((row) =>
-      				row.querySelector('.table-country strong')?.textContent.trim()
-    		)
-    			.filter(Boolean)
+
+		const dayCount = trips.reduce(
+			(total, trip) =>
+				total + Number(trip.duration || 0),
+			0
 		);
 
+		const uniqueCountries = new Set(
+			trips.map((trip) =>
+				trip.country.trim().toLowerCase()
+			)
+		).size;
+
+		if (totalTrips) {
+			totalTrips.textContent = String(trips.length);
+		}
+
+		if (totalDays) {
+			totalDays.textContent = String(dayCount);
+		}
+
 		if (countriesVisited) {
-  			countriesVisited.textContent = String(uniqueCountries.size);
+			countriesVisited.textContent =
+				String(uniqueCountries);
 		}
-		if (emptyState) emptyState.hidden = items.length > 0;
+
+		if (emptyState) {
+			emptyState.hidden = trips.length > 0;
+		}
 	};
-	rows.addEventListener('click', (event) => {
-  		const deleteButton = event.target.closest('.delete-trip');
 
-  		if (!deleteButton) return;
+	if (form) {
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
 
-  		deleteButton.closest('tr')?.remove();
-  		updateStats();
-	});
+			const country =
+				form.elements.country.value.trim();
 
-	form.addEventListener('submit', (event) => {
-		event.preventDefault();
-		const country = form.elements.country.value.trim();
-		const departure = form.elements.departure.value;
-		const returnDate = form.elements.returnDate.value;
-		if (!country || !departure || !returnDate) return;
+			const departure =
+				form.elements.departure.value;
 
-		const departureDate = new Date(departure);
-		const returnDateValue = new Date(returnDate);
-		const duration = Math.max(1, Math.round((returnDateValue - departureDate) / 86400000) + 1);
+			const returnDate =
+				form.elements.returnDate.value;
 
-		const row = document.createElement('tr');
-		row.dataset.days = String(duration);
-		row.innerHTML = `
-			<td><div class="table-country"><strong>${country}</strong><span>International</span></div></td>
-			<td>${formatDate(departureDate)}</td>
-			<td>${formatDate(returnDateValue)}</td>
-			<td><span class="pill neutral">${duration} days</span></td>
-			<td><button type="button" class="delete-trip">Delete</button></td>
-		`;
+			if (!country || !departure || !returnDate) {
+				return;
+			}
 
-		rows.prepend(row);
-		form.reset();
-		updateStats();
-		backdropClose();
-	});
+			if (
+				new Date(`${returnDate}T00:00:00`) <
+				new Date(`${departure}T00:00:00`)
+			) {
+				alert(
+					'Return date cannot be before departure date.'
+				);
 
-	function backdropClose() {
-		const backdrop = document.querySelector('[data-modal-backdrop]');
-		if (backdrop) {
-			backdrop.classList.remove('open');
-			backdrop.setAttribute('aria-hidden', 'true');
-		}
+				return;
+			}
+
+			const appData = getAppData();
+
+			appData.trips.push({
+				id: crypto.randomUUID(),
+				country,
+				departure,
+				returnDate,
+				duration: calculateDuration(
+					departure,
+					returnDate
+				)
+			});
+
+			appData.travelReviewed = true;
+
+			saveAppData(appData);
+
+			form.reset();
+			renderTrips();
+
+			const backdrop = document.querySelector(
+				'[data-modal-backdrop]'
+			);
+
+			if (backdrop) {
+				backdrop.classList.remove('open');
+				backdrop.setAttribute(
+					'aria-hidden',
+					'true'
+				);
+			}
+		});
 	}
 
-	updateStats();
+	rows.addEventListener('click', (event) => {
+		const deleteButton = event.target.closest(
+			'[data-delete-trip]'
+		);
+
+		if (!deleteButton) return;
+
+		const tripId = deleteButton.dataset.tripId;
+		const appData = getAppData();
+
+		appData.trips = appData.trips.filter(
+			(trip) => trip.id !== tripId
+		);
+
+		saveAppData(appData);
+		renderTrips();
+	});
+
+	renderTrips();
 }
 
 function setupDocumentsPage() {
