@@ -564,7 +564,18 @@ function setupOnboarding() {
 
 	if (finishButton) {
 		finishButton.addEventListener('click', () => {
-			console.log('Completed onboarding:', onboardingData);
+			const appData = getAppData();
+
+			appData.profile = {
+				name: onboardingData.name,
+				country: onboardingData.country,
+				immigrationProcess: onboardingData.immigrationProcess
+			};
+
+			appData.onboardingCompleted = true;
+
+			saveAppData(appData);
+			// console.log('Completed onboarding:', onboardingData);
 
 			window.location.href = 'dashboard.html';
 		});
