@@ -952,6 +952,18 @@ function setupDashboard() {
 		'[data-dashboard-progress]'
 	);
 
+	const totalTripsElement = document.querySelector(
+		'[data-dashboard-total-trips]'
+	);
+
+	const totalDaysElement = document.querySelector(
+		'[data-dashboard-total-days]'
+	);
+
+	const countriesVisitedElement = document.querySelector(
+		'[data-dashboard-countries-visited]'
+	);
+
 	if (
 		!nameElements.length &&
 		!processElement &&
@@ -972,6 +984,17 @@ function setupDashboard() {
 	};
 
 	const documents = appData.documents || [];
+
+	const trips = appData.trips || [];
+
+	const totalTrips = trips.length;
+
+	const totalDays = trips.reduce(
+		(total, trip) => total + Number(trip.duration || 0),
+		0
+	);
+
+	const countriesVisited = new Set(trips.map((trip) => trip.country)).size;
 
 	const totalDocuments = documents.length;
 
@@ -1029,6 +1052,21 @@ function setupDashboard() {
 	if (progressElement) {
 		progressElement.textContent =
 			`${completionScore}%`;
+	}
+
+	if (totalTripsElement) {
+		totalTripsElement.textContent =
+			String(totalTrips);
+	}
+
+	if (totalDaysElement) {
+		totalDaysElement.textContent =
+			String(totalDays);
+	}
+
+	if (countriesVisitedElement) {
+		countriesVisitedElement.textContent =
+			String(countriesVisited);
 	}
 }
 
