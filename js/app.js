@@ -1,3 +1,54 @@
+const STORAGE_KEY = 'organizeUsData';
+
+const defaultAppData = {
+	profile: {
+		name: '',
+		country: '',
+		immigrationProcess: ''
+	},
+	documents: [],
+	trips: [],
+	travelReviewed: false,
+	onboardingCompleted: false
+};
+
+function createDefaultAppData() {
+	return JSON.parse(JSON.stringify(defaultAppData));
+}
+
+function getAppData() {
+	const savedData = localStorage.getItem(STORAGE_KEY);
+
+	if (!savedData) {
+		return createDefaultAppData();
+	}
+
+	try {
+		const parsedData = JSON.parse(savedData);
+
+		return {
+			...createDefaultAppData(),
+			...parsedData,
+			profile: {
+				...defaultAppData.profile,
+				...parsedData.profile
+			}
+		};
+	} catch (error) {
+		console.error('Unable to read saved OrganizeUs data:', error);
+		return createDefaultAppData();
+	}
+	
+}
+
+function saveAppData(data) {
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function resetAppData() {
+	localStorage.removeItem(STORAGE_KEY);
+}
+
 function svg(name) {
 	const icons = {
 		menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>',
@@ -532,6 +583,10 @@ function setupScoreRings() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+	// // temporary datafor testing
+	// const testData = getAppData();
+	// console.log('Loaded OrganizeUs data:', testData);
+
 	setActiveNav();
 	setupLandingMenu();
 	setupSidebar();
