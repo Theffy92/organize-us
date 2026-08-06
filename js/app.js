@@ -8,6 +8,7 @@ const defaultAppData = {
 	},
 	documents: [],
 	trips: [],
+	assistantChat: [],
 	travelReviewed: false,
 	onboardingCompleted: false
 };
@@ -32,7 +33,13 @@ function getAppData() {
 			profile: {
 				...defaultAppData.profile,
 				...parsedData.profile
-			}
+			},
+			assistantChat: Array.isArray(parsedData.assistantChat)
+				? parsedData.assistantChat.filter((message) => {
+					return message && typeof message.text === 'string' &&
+						typeof message.role === 'string';
+				})
+				: []
 		};
 	} catch (error) {
 		console.error('Unable to read saved OrganizeUs data:', error);
@@ -1091,104 +1098,171 @@ function setupDemoReset() {
 }
 
 function setupAssistant() {
-	const chat = document.querySelector('[data-assistant-chat]');
-	const input = document.querySelector('[data-assistant-input]');
-	const sendButton = document.querySelector(
-		'[data-assistant-send]'
-	);
-	const loadingMessage = document.querySelector(
-		'[data-assistant-loading]'
-	);
+	document.querySelectorAll('[data-assistant-widget]').forEach((widget) => {
+		const chat = widget.querySelector('[data-assistant-chat]');
+		const input = widget.querySelector('[data-assistant-input]');
+		const sendButton = widget.querySelector('[data-assistant-send]');
+		const loadingMessage = widget.querySelector('[data-assistant-loading]');
+		const toggleButton = widget.querySelector('[data-assistant-toggle]');
+		const body = widget.querySelector('[data-assistant-body]');
 
-	if (!chat || !input || !sendButton) return;
+		const renderChat = (messages) => {
+			chat.innerHTML = '';
 
-	const addMessage = (text, role) => {
-		const row = document.createElement('div');
-		row.className = `chat-row ${role}`;
+			const initialMessages = messages.length > 0
+				? messages
+				: [{
+					role: 'assistant',
+					text: 'How can I help you organize your immigration records today?'
+				}];
 
-		const bubble = document.createElement('div');
-		bubble.className = 'bubble';
-		bubble.textContent = text;
+			initialMessages.forEach((message) => {
+				const row = document.createElement('div');
+				row.className = `chat-row ${message.role}`;
 
-		row.appendChild(bubble);
-		chat.appendChild(row);
+				const bubble = document.createElement('div');
+				bubble.className = 'bubble';
+				bubble.textContent = message.text;
 
-		chat.scrollTop = chat.scrollHeight;
-	};
+				row.appendChild(bubble);
+				chat.appendChild(row);
+			});
 
-	const sendMessage = async () => {
-		const message = input.value.trim();
+			chat.scrollTop = chat.scrollHeight;
+		};
 
-		if (!message) return;
+		const refreshFromStorage = () => {
+			const latestAppData = getAppData();
+			renderChat(latestAppData.assistantChat || []);
+		};
 
-		const appData = getAppData();
+		if (toggleButton && body) {
+			const syncToggleLabel = () => {
+				const collapsed = widget.dataset.collapsed === 'true';
+				toggleButton.textContent = collapsed ? 'Show chat' : 'Hide chat';
+				toggleButton.setAttribute('aria-expanded', String(!collapsed));
+			};
 
-		addMessage(message, 'user');
+			const setCollapsed = (collapsed) => {
+				widget.dataset.collapsed = String(collapsed);
+				body.hidden = collapsed;
+				syncToggleLabel();
+			};
 
-		input.value = '';
-		sendButton.disabled = true;
+			toggleButton.addEventListener('click', () => {
+				setCollapsed(widget.dataset.collapsed !== 'true');
+			});
 
-		if (loadingMessage) {
-			loadingMessage.hidden = false;
+			setCollapsed(widget.dataset.collapsed === 'true');
 		}
 
-		try {
-			const response = await fetch(
-				'https://organize-us-api.onrender.com/assistant',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						message,
-						profile: appData.profile,
-						documents: appData.documents
-					})
-				}
-			);
+		if (!chat || !input || !sendButton) return;
 
-			const data = await response.json();
+		const saveChatMessage = (role, text) => {
+			const nextAppData = getAppData();
+			nextAppData.assistantChat = Array.isArray(nextAppData.assistantChat)
+				? nextAppData.assistantChat
+				: [];
+			nextAppData.assistantChat.push({ role, text });
+			saveAppData(nextAppData);
+		};
 
-			if (!response.ok) {
-				throw new Error(
-					data.error ||
-					'The assistant request failed.'
-				);
-			}
+		const addMessage = (text, role) => {
+			const row = document.createElement('div');
+			row.className = `chat-row ${role}`;
 
-			if (!data.response) {
-				throw new Error(
-					'The assistant returned an empty response.'
-				);
-			}
+			const bubble = document.createElement('div');
+			bubble.className = 'bubble';
+			bubble.textContent = text;
 
-			addMessage(data.response, 'assistant');
-		} catch (error) {
-			console.error(error);
+			row.appendChild(bubble);
+			chat.appendChild(row);
 
-			addMessage(
-				'The assistant is temporarily unavailable. Please try again.',
-				'assistant'
-			);
-		} finally {
-			sendButton.disabled = false;
+			chat.scrollTop = chat.scrollHeight;
+		};
+
+		refreshFromStorage();
+
+		window.addEventListener('storage', (event) => {
+			if (event.key !== STORAGE_KEY) return;
+			refreshFromStorage();
+		});
+
+		const sendMessage = async () => {
+			const message = input.value.trim();
+
+			if (!message) return;
+
+			const appData = getAppData();
+
+			addMessage(message, 'user');
+			saveChatMessage('user', message);
+
+			input.value = '';
+			sendButton.disabled = true;
 
 			if (loadingMessage) {
-				loadingMessage.hidden = true;
+				loadingMessage.hidden = false;
 			}
 
-			input.focus();
-		}
-	};
+			try {
+				const response = await fetch(
+					'https://organize-us-api.onrender.com/assistant',
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							message,
+							profile: appData.profile,
+							documents: appData.documents
+						})
+					}
+				);
 
-	sendButton.addEventListener('click', sendMessage);
+				const data = await response.json();
 
-	input.addEventListener('keydown', (event) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			sendMessage();
-		}
+				if (!response.ok) {
+					throw new Error(
+						data.error || 'The assistant request failed.'
+					);
+				}
+
+				if (!data.response) {
+					throw new Error(
+						'The assistant returned an empty response.'
+					);
+				}
+
+				addMessage(data.response, 'assistant');
+				saveChatMessage('assistant', data.response);
+			} catch (error) {
+				console.error(error);
+
+				const fallbackMessage =
+					'The assistant is temporarily unavailable. Please try again.';
+				addMessage(fallbackMessage, 'assistant');
+				saveChatMessage('assistant', fallbackMessage);
+			} finally {
+				sendButton.disabled = false;
+
+				if (loadingMessage) {
+					loadingMessage.hidden = true;
+				}
+
+				input.focus();
+			}
+		};
+
+		sendButton.addEventListener('click', sendMessage);
+
+		input.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				sendMessage();
+			}
+		});
 	});
 }
 
