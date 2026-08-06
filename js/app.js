@@ -164,19 +164,24 @@ function generateChecklist(process) {
 
 function calculateCompletionScore(appData) {
 	const documents = appData.documents || [];
+	const trips = appData.trips || [];
 
 	const completedDocuments = documents.filter(
 		(documentItem) => documentItem.completed
 	).length;
 
 	const totalDocuments = documents.length;
+	const totalTrips = trips.length;
 
-	if (totalDocuments === 0) {
+	const totalProgressItems = totalDocuments + 4;
+	const completedProgressItems = completedDocuments + Math.min(totalTrips, 4);
+
+	if (totalDocuments === 0 && totalTrips === 0) {
 		return 0;
 	}
 
 	return Math.round(
-		(completedDocuments / totalDocuments) * 100
+		(completedProgressItems / totalProgressItems) * 100
 	);
 }
 
@@ -1187,6 +1192,10 @@ function setupDashboard() {
 		'[data-dashboard-score-value]'
 	);
 
+	const statusTagElement = document.querySelector(
+		'[data-dashboard-status-tag]'
+	);
+
 	const scoreBarElement = document.querySelector(
 		'[data-dashboard-score-bar]'
 	);
@@ -1213,7 +1222,8 @@ function setupDashboard() {
 		!totalDocumentsElement &&
 		!completedDocumentsElement &&
 		!remainingDocumentsElement &&
-		!scoreValueElement
+		!scoreValueElement &&
+		!statusTagElement
 	) {
 		return;
 	}
@@ -1281,6 +1291,19 @@ function setupDashboard() {
 	if (scoreValueElement) {
 		scoreValueElement.textContent =
 			`${completionScore}%`;
+	}
+
+	if (statusTagElement) {
+		const onTrack = completedDocuments > 0;
+		const inProgress = !onTrack && totalTrips > 0;
+		statusTagElement.textContent = onTrack
+			? 'On Track'
+			: inProgress
+				? 'In Progress'
+				: 'Not Started';
+		statusTagElement.classList.toggle('success', onTrack);
+		statusTagElement.classList.toggle('warning', inProgress);
+		statusTagElement.classList.toggle('neutral', !onTrack && !inProgress);
 	}
 
 	if (scoreBarElement) {
