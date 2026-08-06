@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from model import run_onboarding_model
+from model import run_onboarding_model, run_assistant_model
 
 app = Flask(__name__)
 CORS(app,
     resources={
-        r"/chat": {
+        r"/*": {
             "origins": [
                 "http://localhost:8000",
                 "https://theffy92.github.io",
@@ -40,6 +40,39 @@ def chat():
         return jsonify({"error": str(error)}), 400
     except Exception:
         app.logger.exception("The Groq API request failed.")
+
+        return jsonify(
+            {
+                "error": (
+                    "The assistant is temporarily unavailable. "
+                    "Please try again later."
+                )
+            }
+        ), 500
+
+@app.post("/assistant")
+def assistant():
+    """Answer a post-onboarding AI assistant question."""
+    data = request.get_json(silent=True) or {}
+
+    message = data.get("message")
+    profile = data.get("profile")
+    documents = data.get("documents")
+
+    if not isinstance(message, str) or not message.strip():
+        return jsonify({"error": "A non-empty message is required."}), 400
+
+    if not isinstance(profile, dict):
+        return jsonify({"error": "A valid profile object is required."}), 400
+
+    if not isinstance(documents, list):
+        return jsonify({"error": "A valid documents list is required."}), 400
+
+    try:
+        reply = run_assistant_model(message.strip(), profile, documents)
+        return jsonify({"response": reply})
+    except Exception:
+        app.logger.exception("The post-onboarding assistant request failed.")
 
         return jsonify(
             {
