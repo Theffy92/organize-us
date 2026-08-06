@@ -1090,6 +1090,108 @@ function setupDemoReset() {
 	});
 }
 
+function setupAssistant() {
+	const chat = document.querySelector('[data-assistant-chat]');
+	const input = document.querySelector('[data-assistant-input]');
+	const sendButton = document.querySelector(
+		'[data-assistant-send]'
+	);
+	const loadingMessage = document.querySelector(
+		'[data-assistant-loading]'
+	);
+
+	if (!chat || !input || !sendButton) return;
+
+	const addMessage = (text, role) => {
+		const row = document.createElement('div');
+		row.className = `chat-row ${role}`;
+
+		const bubble = document.createElement('div');
+		bubble.className = 'bubble';
+		bubble.textContent = text;
+
+		row.appendChild(bubble);
+		chat.appendChild(row);
+
+		chat.scrollTop = chat.scrollHeight;
+	};
+
+	const sendMessage = async () => {
+		const message = input.value.trim();
+
+		if (!message) return;
+
+		const appData = getAppData();
+
+		addMessage(message, 'user');
+
+		input.value = '';
+		sendButton.disabled = true;
+
+		if (loadingMessage) {
+			loadingMessage.hidden = false;
+		}
+
+		try {
+			const response = await fetch(
+				'https://organize-us-api.onrender.com/assistant',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						message,
+						profile: appData.profile,
+						documents: appData.documents
+					})
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(
+					data.error ||
+					'The assistant request failed.'
+				);
+			}
+
+			if (!data.response) {
+				throw new Error(
+					'The assistant returned an empty response.'
+				);
+			}
+
+			addMessage(data.response, 'assistant');
+		} catch (error) {
+			console.error(error);
+
+			addMessage(
+				'The assistant is temporarily unavailable. Please try again.',
+				'assistant'
+			);
+		} finally {
+			sendButton.disabled = false;
+
+			if (loadingMessage) {
+				loadingMessage.hidden = true;
+			}
+
+			input.focus();
+		}
+	};
+
+	sendButton.addEventListener('click', sendMessage);
+
+	input.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			sendMessage();
+		}
+	});
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 	// // temporary datafor testing
 	// const testData = getAppData();
@@ -1106,4 +1208,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupProfileHeader();
 	setupScoreRings();
 	setupDemoReset();
+	setupAssistant();
 });

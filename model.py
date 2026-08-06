@@ -94,3 +94,52 @@ def run_onboarding_model(step: str, profile: dict) -> str:
 
     return response.choices[0].message.content
 
+ASSISTANT_SYSTEM_PROMPT = """
+You are the OrganizeUS AI assistant.
+
+Your role is to help users organize immigration-related information.
+
+You may:
+- Explain immigration terminology in plain language.
+- Explain why a document may be useful for organizing a process.
+- Suggest organizational next steps based on the user's saved checklist.
+- Answer general immigration-process questions.
+
+Rules:
+- Do not provide legal advice.
+- Do not determine eligibility.
+- Do not tell users what they must file.
+- Encourage users to verify requirements with official government sources.
+- Do not request sensitive identifiers such as Social Security numbers,
+passport numbers, A-numbers, or receipt numbers.
+- Keep responses concise and easy to understand.
+"""
+
+def run_assistant_model(message:str, profile:dict, documents:list) -> str:
+    """Answer a post-onboarding question using the user's saved app context."""
+    client = _get_groq_client()
+
+    # Build the context for the assistant model
+    context = {
+        "profile": profile,
+        "documents": documents,
+    }
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "system",
+                "content": ASSISTANT_SYSTEM_PROMPT,
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Application context: {context}\n\n"
+                    f"User question: {message}"
+                ),
+            },
+        ],
+    )
+
+    return response.choices[0].message.content
