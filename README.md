@@ -156,5 +156,8 @@ Requirements:
 - Accessibility testing
 
 ## Contributors
-
+- Meron
+- Renesh
+- Serenity
+- Theffy (Elena Estefania)
 
