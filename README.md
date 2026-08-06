@@ -2,63 +2,152 @@
 
 ## Overview
 
-OrganizeUS is a static web prototype for helping users organize immigration-related records, documents, travel history, dates, and milestones.
+OrganizeUS is an AI-powered web application that helps users organize immigration-related records, documents, travel history, and important milestones throughout their U.S. immigration journey.
 
-This demo is for organization only. It does not provide legal advice, determine eligibility, recommend forms, or claim that a user is ready to file.
+The application provides a personalized onboarding experience, generates document checklists based on the user's immigration process, and offers an AI assistant to answer organizational questions.
+
+This demo is intended for organization only. It does **not** provide legal advice, determine immigration eligibility, recommend forms, or indicate that a user is ready to file.
+
+---
 
 ## Problem
 
-Immigration processes often require people to organize travel dates, documents, expiration dates, address history, employment history, and important milestones.
+Immigration processes often require people to organize travel history, important documents, expiration dates, and other personal records over many years.
 
-## Current MVP features
+OrganizeUS helps users keep that information organized in one place, making it easier to prepare for future immigration processes without replacing official guidance or legal advice.
 
-- Landing page
-- Guided onboarding
-- Dashboard
-- Travel-history organizer
-- Document organizer
-- Timeline
-- Organizational completion overview
-- Sample summary
-- Responsive layout
+---
+
+## Current MVP Features
+
+### 🤖 AI-powered onboarding
+- Conversational onboarding experience
+- Supports the following immigration processes in this MVP:
+  - Permanent Residency
+  - Naturalization
+  - F-1 Student Visa
+
+### 📄 Personalized document checklist
+- Automatically generates a checklist based on the selected immigration process
+- Mark documents as organized
+- Progress updates automatically throughout the application
+
+### ✈️ Travel history
+- Add and remove travel records
+- Automatic calculation of:
+  - Total trips
+  - Total days outside the U.S.
+
+### 📊 Dashboard
+- Personalized greeting
+- Immigration process overview
+- Organizational completion score
+- Document statistics
+- Travel statistics
+- Suggested next steps
+
+### ⏱ Timeline & Readiness
+- Dynamic organizational timeline
+- Personalized summary
+- Missing document detection
+- Shared completion score
+
+### 💬 AI Assistant
+- Available throughout the application
+- Answers questions about:
+  - immigration terminology
+  - document organization
+  - next organizational steps
+- Uses the user's saved profile and document checklist as context
+- Does **not** provide legal advice
+
+### 💾 Persistent demo data
+- Browser Local Storage
+- Demo data persists across page refreshes
+- Reset Demo option to restart the experience
+
+### 📱 Responsive interface
+- Desktop and mobile friendly
+
+---
 
 ## Technology
+
+### Frontend
 
 - HTML
 - CSS
 - Vanilla JavaScript
-- GitHub Pages
+
+### Backend
+
+- Python
+- Flask
+
+### AI
+
+- Groq API
+- Llama 3.3 70B
+
+### Storage
+
+- Browser Local Storage
+
+### Deployment
+
+- GitHub Pages (frontend)
+- Render (backend API)
+
+---
 
 ## Project structure
 
-- `index.html` - landing page
-- `onboarding.html` - guided onboarding flow
-- `dashboard.html` - main overview dashboard
-- `travel.html` - travel-history organizer
-- `documents.html` - document organizer
-- `timeline.html` - timeline and progress overview
-- `css/styles.css` - shared styles and responsive layout rules
-- `js/app.js` - shared page behavior and interactions
-- `assets/images/` - space for supporting images
-- `assets/prototype/` - prototype image references
-- `.gitignore` - local files to exclude from version control
-- `README.md` - project notes and setup instructions
+- `index.html` — landing page
+- `onboarding.html` — AI-guided onboarding
+- `dashboard.html` — personalized dashboard
+- `travel.html` — travel history
+- `documents.html` — document organizer
+- `timeline.html` — timeline and readiness overview
+- `css/styles.css` — shared styles
+- `js/app.js` — application logic
+- `assets/images/` — images
+- `assets/prototype/` — design references
+- `.gitignore`
+- `README.md`
+
+---
 
 ## Live Demo
 
-The latest version of the project is automatically deployed with GitHub Pages whenever changes are merged into the `main` branch.
+The latest version of the frontend is automatically deployed through GitHub Pages whenever changes are merged into the `main` branch.
 
-**Live URL:**
+**Frontend**
 
 https://theffy92.github.io/organize-us/
 
+The AI backend is deployed separately on Render.
 
+---
+
+## Demo Flow
+
+1. Complete the AI onboarding.
+2. Select your immigration process.
+3. Review the personalized document checklist.
+4. Organize your documents.
+5. Add travel history.
+6. View the updated dashboard.
+7. Review the Timeline & Readiness page.
+8. Ask questions using the AI assistant.
+9. Use **Reset Demo** to restart the experience.
+
+---
 
 ## GitHub Codespaces
 
 1. Open the repository on GitHub.
-2. Click `Code`.
-3. Select the `Codespaces` tab.
+2. Click **Code**.
+3. Select the **Codespaces** tab.
 4. Create a Codespace from `main`.
 5. Run:
 
@@ -66,44 +155,35 @@ https://theffy92.github.io/organize-us/
 python3 -m http.server 8000
 ```
 
-6. Open the forwarded port when prompted.
+6. Open the forwarded port.
 
-## Collaboration workflow
+---
+
+## Collaboration Workflow
 
 1. Open this repository in your own **GitHub Codespace**.
-2. Make sure you're working from the latest `main` branch.
-3. Create a new branch for your task. Always create your branch from `main` and **never** work directly on the `main` branch.
+2. Update your local `main` branch.
+3. Create a feature branch from `main`.
 4. Make one focused change.
-5. Preview and test your changes.
-
-   If **Live Preview** is available, open `index.html` and launch the preview.
-
-   You can also run:
-
-   ```bash
-   python3 -m http.server 8000
-   ```
-
-   Then open the forwarded port provided by GitHub Codespaces.
-
-6. Before committing, make sure your feature branch is still up to date with main.
-
-   If other pull requests have been merged since you created your branch, bring the latest changes from `main` into `your branch`, resolve any merge conflicts if necessary, and test your changes again before      committing. This helps avoid conflicts later and ensures your work is compatible with the latest version of the project.
+5. Test your changes locally.
+6. If necessary, update your branch with the latest `main`.
 7. Commit and push your branch.
-8. Open a pull request. If there are no merge conflicts and all checks pass, you don't need to wait for approval; go ahead and merge it into `main`.
-9. After merging, post a quick update in the #building channel so everyone knows `main` has changed and can update their feature branches before opening or merging their own pull requests.
-10. Repeat the process for each new task.
+8. Open a Pull Request.
+9. Merge into `main` after all checks pass.
+10. Notify the team that `main` has changed.
 
 Example branch names:
 
-- `feature/travel-form`
-- `feature/document-cards`
+- `feature/onboarding-ai`
+- `feature/document-checklist`
+- `feature/travel-history`
 - `fix/mobile-navigation`
-- `style/dashboard-spacing`
 
-## Copilot prompt template
+---
 
-You can use the following prompt with **GitHub Copilot Chat** whenever you need to make a change. **Always create a new branch before asking Copilot to modify the code.**
+## Copilot Prompt Template
+
+You can use the following prompt with **GitHub Copilot Chat** whenever you need to make a change.
 
 ```text
 Review the project before editing.
@@ -113,51 +193,56 @@ Make this specific change:
 
 Requirements:
 - Use only HTML, CSS, and vanilla JavaScript.
-- Do not add frameworks, packages, or build tools.
+- Do not add frameworks.
 - Preserve the existing design.
 - Do not change unrelated files.
 - Use relative paths.
 - Test the result.
 - Summarize every file changed.
-- If anything is unclear, ask before making assumptions.
 - Explain your implementation before modifying multiple files.
 ```
 
+---
 
-## Privacy and safety
+## Privacy & Safety
 
 - The demo uses fictional data.
-- Users should not enter real immigration identifiers, addresses, passport numbers, or confidential files.
-- The prototype does not upload or securely store documents.
-- The prototype does not provide legal advice.
-- A production version would require security, privacy, and legal review.
+- Do not enter real immigration identifiers.
+- Do not upload confidential documents.
+- OrganizeUS is an organizational tool only.
+- The AI assistant does **not** provide legal advice.
 
-## Current limitations
+---
+
+## Current Limitations
 
 - No authentication
 - No database
-- No permanent storage
+- Local Storage only
 - No document uploads
-- No real reminders
-- No real AI integration yet
-- No legal analysis
-- Fictional sample data only
+- No reminder notifications
+- No OCR
+- No eligibility analysis
+- No legal advice
 
-## Future improvements
+---
 
-- Browser localStorage
-- Secure user accounts
+## Future Improvements
+
+- User accounts
+- Cloud database
 - Encrypted storage
 - Reminder notifications
 - AI-generated organizational summaries
-- Document classification
-- Links to official resources
+- Links to official USCIS resources
 - Multilingual support
-- Accessibility testing
+- Accessibility improvements
+
+---
 
 ## Contributors
+
 - Meron
 - Renesh
 - Serenity
 - Theffy (Elena Estefania)
-
