@@ -172,17 +172,20 @@ function calculateCompletionScore(appData) {
 
 	const totalDocuments = documents.length;
 	const totalTrips = trips.length;
+	const travelComplete = totalTrips > 0;
+	const documentsComplete = totalDocuments > 0 && completedDocuments === totalDocuments;
 
-	const totalProgressItems = totalDocuments + 4;
-	const completedProgressItems = completedDocuments + Math.min(totalTrips, 4);
-
-	if (totalDocuments === 0 && totalTrips === 0) {
+	if (completedDocuments === 0 && totalTrips === 0) {
 		return 0;
 	}
 
-	return Math.round(
-		(completedProgressItems / totalProgressItems) * 100
-	);
+	const completedSections = [
+		travelComplete,
+		documentsComplete,
+		Boolean(appData.onboardingCompleted) && (totalTrips > 0 || completedDocuments > 0)
+	].filter(Boolean).length;
+
+	return Math.round((completedSections / 3) * 100);
 }
 
 function setActiveNav() {
