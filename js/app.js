@@ -162,6 +162,24 @@ function generateChecklist(process) {
 	return checklists[process] || [];
 }
 
+function calculateCompletionScore(appData) {
+	const documents = appData.documents || [];
+
+	const completedDocuments = documents.filter(
+		(documentItem) => documentItem.completed
+	).length;
+
+	const totalDocuments = documents.length;
+
+	if (totalDocuments === 0) {
+		return 0;
+	}
+
+	return Math.round(
+		(completedDocuments / totalDocuments) * 100
+	);
+}
+
 function setActiveNav() {
 	const page = document.body.dataset.page;
 	if (!page) return;
@@ -578,6 +596,216 @@ function setupDocumentsPage() {
 	}
 
 	renderDocuments();
+}
+
+function setupTimelinePage() {
+	const timelineList = document.querySelector(
+		'[data-timeline-list]'
+	);
+
+	const scoreRing = document.querySelector(
+		'[data-timeline-score]'
+	);
+
+	const scoreValue = document.querySelector(
+		'[data-timeline-score-value]'
+	);
+
+	const summaryContainer = document.querySelector(
+		'[data-timeline-summary]'
+	);
+
+	const missingContainer = document.querySelector(
+		'[data-timeline-missing]'
+	);
+
+	const nextStepElement = document.querySelector(
+		'[data-timeline-next-step]'
+	);
+
+	if (
+		!timelineList &&
+		!scoreRing &&
+		!summaryContainer &&
+		!missingContainer
+	) {
+		return;
+	}
+
+	const appData = getAppData();
+
+	const processLabels = {
+		'permanent-residency': 'Permanent Residency',
+		naturalization: 'Naturalization',
+		'f1-visa': 'F-1 Student Visa'
+	};
+
+	const documents = appData.documents || [];
+	const trips = appData.trips || [];
+
+	const completedDocuments = documents.filter(
+		(documentItem) => documentItem.completed
+	).length;
+
+	const totalDocuments = documents.length;
+
+	const completionScore =
+		calculateCompletionScore(appData);
+
+	if (scoreRing) {
+		scoreRing.dataset.score = String(completionScore);
+		scoreRing.style.setProperty(
+			'--score',
+			completionScore
+		);
+	}
+
+	if (scoreValue) {
+		scoreValue.textContent = `${completionScore}%`;
+	}
+
+	if (timelineList) {
+		timelineList.innerHTML = '';
+
+		const onboardingItem = document.createElement('li');
+		onboardingItem.className = 'timeline-item';
+		onboardingItem.innerHTML = `
+			<div>
+				<strong>Started</strong>
+				<p>
+					Created a ${
+						processLabels[
+							appData.profile.immigrationProcess
+						] || 'personalized'
+					} organization plan
+				</p>
+			</div>
+		`;
+
+		timelineList.appendChild(onboardingItem);
+
+		trips.forEach((trip) => {
+			const tripItem = document.createElement('li');
+			tripItem.className = 'timeline-item';
+
+			const departureDate = new Date(
+				`${trip.departure}T00:00:00`
+			);
+
+			tripItem.innerHTML = `
+				<div>
+					<strong>${departureDate.getFullYear()}</strong>
+					<p>
+						Recorded a trip to ${trip.country}
+						(${trip.duration} days)
+					</p>
+				</div>
+			`;
+
+			timelineList.appendChild(tripItem);
+		});
+
+		documents
+			.filter((documentItem) => documentItem.completed)
+			.forEach((documentItem) => {
+				const documentItemElement =
+					document.createElement('li');
+
+				documentItemElement.className =
+					'timeline-item';
+
+				documentItemElement.innerHTML = `
+					<div>
+						<strong>Organized</strong>
+						<p>
+							Marked ${documentItem.name} as on file
+						</p>
+					</div>
+				`;
+
+				timelineList.appendChild(
+					documentItemElement
+				);
+			});
+	}
+
+	if (summaryContainer) {
+		summaryContainer.innerHTML = `
+			<p>
+				• Your selected plan is ${
+					processLabels[
+						appData.profile.immigrationProcess
+					] || 'not selected'
+				}.
+			</p>
+
+			<p>
+				• You have recorded ${trips.length}
+				${trips.length === 1 ? 'trip' : 'trips'}.
+			</p>
+
+			<p>
+				• You have organized ${completedDocuments}
+				of ${totalDocuments} tracked documents.
+			</p>
+
+			<p>
+				• Your current organizational completion score
+				is ${completionScore}%.
+			</p>
+		`;
+	}
+
+	if (missingContainer) {
+		missingContainer.innerHTML = '';
+
+		const missingDocuments = documents.filter(
+			(documentItem) => !documentItem.completed
+		);
+
+		if (missingDocuments.length === 0) {
+			missingContainer.innerHTML = `
+				<div class="info-row">
+					<span>Document checklist</span>
+					<span class="pill success">
+						Complete
+					</span>
+				</div>
+			`;
+		} else {
+			missingDocuments.forEach((documentItem) => {
+				const row = document.createElement('div');
+
+				row.className = 'info-row';
+
+				row.innerHTML = `
+					<span>${documentItem.name}</span>
+					<span class="pill warning">
+						Missing
+					</span>
+				`;
+
+				missingContainer.appendChild(row);
+			});
+		}
+	}
+
+	if (nextStepElement) {
+		const firstMissingDocument = documents.find(
+			(documentItem) => !documentItem.completed
+		);
+
+		if (firstMissingDocument) {
+			nextStepElement.textContent =
+				`Suggested next step: organize ${firstMissingDocument.name}.`;
+		} else if (trips.length === 0) {
+			nextStepElement.textContent =
+				'Suggested next step: review your travel history and add any relevant trips.';
+		} else {
+			nextStepElement.textContent =
+				'Your tracked documents are organized. Review your saved information for accuracy.';
+		}
+	}
 }
 
 function setupOnboarding() {
@@ -1021,11 +1249,7 @@ function setupDashboard() {
 		totalDocuments - completedDocuments;
 
 	const completionScore =
-		totalDocuments === 0
-			? 0
-			: Math.round(
-					(completedDocuments / totalDocuments) * 100
-				);
+		calculateCompletionScore(appData);
 
 	nameElements.forEach((element) => {
 		element.textContent =
@@ -1379,10 +1603,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupModals();
 	setupTravelPage();
 	setupDocumentsPage();
+	setupScoreRings();
+	setupTimelinePage();
 	setupOnboarding();
 	setupDashboard();
 	setupProfileHeader();
-	setupScoreRings();
 	setupDemoReset();
 	setupAssistantWidget();
 });
