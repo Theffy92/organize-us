@@ -10,7 +10,11 @@ const defaultAppData = {
 	trips: [],
 	assistantChat: [],
 	travelReviewed: false,
-	onboardingCompleted: false
+	onboardingCompleted: false,
+	assistant: {
+		isOpen: false,
+		messages: []
+	}
 };
 
 function createDefaultAppData() {
@@ -34,12 +38,16 @@ function getAppData() {
 				...defaultAppData.profile,
 				...parsedData.profile
 			},
-			assistantChat: Array.isArray(parsedData.assistantChat)
-				? parsedData.assistantChat.filter((message) => {
-					return message && typeof message.text === 'string' &&
-						typeof message.role === 'string';
-				})
-				: []
+			assistant: {
+				...defaultAppData.assistant,
+				...parsedData.assistant
+			}
+			// assistantChat: Array.isArray(parsedData.assistantChat)
+			// 	? parsedData.assistantChat.filter((message) => {
+			// 		return message && typeof message.text === 'string' &&
+			// 			typeof message.role === 'string';
+			// 	})
+			// 	: []
 		};
 	} catch (error) {
 		console.error('Unable to read saved OrganizeUs data:', error);
@@ -1097,173 +1105,267 @@ function setupDemoReset() {
 	});
 }
 
-function setupAssistant() {
-	document.querySelectorAll('[data-assistant-widget]').forEach((widget) => {
-		const chat = widget.querySelector('[data-assistant-chat]');
-		const input = widget.querySelector('[data-assistant-input]');
-		const sendButton = widget.querySelector('[data-assistant-send]');
-		const loadingMessage = widget.querySelector('[data-assistant-loading]');
-		const toggleButton = widget.querySelector('[data-assistant-toggle]');
-		const body = widget.querySelector('[data-assistant-body]');
+function setupAssistantWidget() {
+	const appPages = [
+		'dashboard',
+		'travel',
+		'documents',
+		'timeline'
+	];
 
-		const renderChat = (messages) => {
-			chat.innerHTML = '';
+	const currentPage = document.body.dataset.page;
 
-			const initialMessages = messages.length > 0
-				? messages
-				: [{
-					role: 'assistant',
-					text: 'How can I help you organize your immigration records today?'
-				}];
+	if (!appPages.includes(currentPage)) return;
 
-			initialMessages.forEach((message) => {
-				const row = document.createElement('div');
-				row.className = `chat-row ${message.role}`;
+	const widget = document.createElement('div');
 
-				const bubble = document.createElement('div');
-				bubble.className = 'bubble';
-				bubble.textContent = message.text;
+	widget.className = 'assistant-widget';
 
-				row.appendChild(bubble);
-				chat.appendChild(row);
-			});
+	widget.innerHTML = `
+		<button
+			type="button"
+			class="assistant-widget-toggle"
+			data-assistant-toggle
+			aria-expanded="false"
+			aria-controls="assistant-panel"
+		>
+			<span aria-hidden="true">★</span>
+			Ask AI
+		</button>
 
-			chat.scrollTop = chat.scrollHeight;
-		};
+		<section
+			id="assistant-panel"
+			class="assistant-widget-panel"
+			data-assistant-panel
+			hidden
+		>
+			<header class="assistant-widget-header">
+				<div>
+					<strong>OrganizeUS AI</strong>
+					<span>Organization assistant</span>
+				</div>
 
-		const refreshFromStorage = () => {
-			const latestAppData = getAppData();
-			renderChat(latestAppData.assistantChat || []);
-		};
+				<button
+					type="button"
+					class="close-button"
+					data-assistant-close
+					aria-label="Close assistant"
+				>
+					×
+				</button>
+			</header>
 
-		if (toggleButton && body) {
-			const syncToggleLabel = () => {
-				const collapsed = widget.dataset.collapsed === 'true';
-				toggleButton.textContent = collapsed ? 'Show chat' : 'Hide chat';
-				toggleButton.setAttribute('aria-expanded', String(!collapsed));
-			};
+			<div
+				class="assistant-widget-messages"
+				data-assistant-messages
+				aria-live="polite"
+			></div>
 
-			const setCollapsed = (collapsed) => {
-				widget.dataset.collapsed = String(collapsed);
-				body.hidden = collapsed;
-				syncToggleLabel();
-			};
+			<div
+				class="assistant-widget-loading"
+				data-assistant-loading
+				hidden
+			>
+				OrganizeUS AI is preparing a response…
+			</div>
 
-			toggleButton.addEventListener('click', () => {
-				setCollapsed(widget.dataset.collapsed !== 'true');
-			});
+			<div class="assistant-widget-input">
+				<input
+					type="text"
+					data-assistant-input
+					placeholder="Ask a question..."
+					aria-label="Ask OrganizeUS AI"
+				>
 
-			setCollapsed(widget.dataset.collapsed === 'true');
+				<button
+					type="button"
+					class="btn-secondary"
+					data-assistant-send
+				>
+					Send
+				</button>
+			</div>
+		</section>
+	`;
+
+	document.body.appendChild(widget);
+
+	const toggleButton = widget.querySelector(
+		'[data-assistant-toggle]'
+	);
+
+	const closeButton = widget.querySelector(
+		'[data-assistant-close]'
+	);
+
+	const panel = widget.querySelector(
+		'[data-assistant-panel]'
+	);
+
+	const messagesContainer = widget.querySelector(
+		'[data-assistant-messages]'
+	);
+
+	const input = widget.querySelector(
+		'[data-assistant-input]'
+	);
+
+	const sendButton = widget.querySelector(
+		'[data-assistant-send]'
+	);
+
+	const loadingMessage = widget.querySelector(
+		'[data-assistant-loading]'
+	);
+
+	const renderMessages = () => {
+		const appData = getAppData();
+		const messages = appData.assistant.messages || [];
+
+		messagesContainer.innerHTML = '';
+
+		if (messages.length === 0) {
+			const welcomeRow = document.createElement('div');
+			welcomeRow.className = 'chat-row assistant';
+
+			const welcomeBubble = document.createElement('div');
+			welcomeBubble.className = 'bubble';
+			welcomeBubble.textContent =
+				'How can I help you organize your immigration journey?';
+
+			welcomeRow.appendChild(welcomeBubble);
+			messagesContainer.appendChild(welcomeRow);
+
+			return;
 		}
 
-		if (!chat || !input || !sendButton) return;
-
-		const saveChatMessage = (role, text) => {
-			const nextAppData = getAppData();
-			nextAppData.assistantChat = Array.isArray(nextAppData.assistantChat)
-				? nextAppData.assistantChat
-				: [];
-			nextAppData.assistantChat.push({ role, text });
-			saveAppData(nextAppData);
-		};
-
-		const addMessage = (text, role) => {
+		messages.forEach((message) => {
 			const row = document.createElement('div');
-			row.className = `chat-row ${role}`;
+			row.className = `chat-row ${message.role}`;
 
 			const bubble = document.createElement('div');
 			bubble.className = 'bubble';
-			bubble.textContent = text;
+			bubble.textContent = message.content;
 
 			row.appendChild(bubble);
-			chat.appendChild(row);
-
-			chat.scrollTop = chat.scrollHeight;
-		};
-
-		refreshFromStorage();
-
-		window.addEventListener('storage', (event) => {
-			if (event.key !== STORAGE_KEY) return;
-			refreshFromStorage();
+			messagesContainer.appendChild(row);
 		});
 
-		const sendMessage = async () => {
-			const message = input.value.trim();
+		messagesContainer.scrollTop =
+			messagesContainer.scrollHeight;
+	};
 
-			if (!message) return;
+	const setOpenState = (isOpen) => {
+		panel.hidden = !isOpen;
+		toggleButton.setAttribute(
+			'aria-expanded',
+			String(isOpen)
+		);
 
-			const appData = getAppData();
+		const appData = getAppData();
+		appData.assistant.isOpen = isOpen;
+		saveAppData(appData);
 
-			addMessage(message, 'user');
-			saveChatMessage('user', message);
+		if (isOpen) {
+			renderMessages();
+			input.focus();
+		}
+	};
 
-			input.value = '';
-			sendButton.disabled = true;
+	const sendMessage = async () => {
+		const message = input.value.trim();
 
-			if (loadingMessage) {
-				loadingMessage.hidden = false;
-			}
+		if (!message) return;
 
-			try {
-				const response = await fetch(
-					'https://organize-us-api.onrender.com/assistant',
-					{
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
-							message,
-							profile: appData.profile,
-							documents: appData.documents
-						})
-					}
+		const appData = getAppData();
+
+		appData.assistant.messages.push({
+			role: 'user',
+			content: message
+		});
+
+		saveAppData(appData);
+		renderMessages();
+
+		input.value = '';
+		sendButton.disabled = true;
+		loadingMessage.hidden = false;
+
+		try {
+			const response = await fetch(
+				'https://organize-us-api.onrender.com/assistant',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						message,
+						profile: appData.profile,
+						documents: appData.documents
+					})
+				}
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(
+					data.error ||
+					'The assistant request failed.'
 				);
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					throw new Error(
-						data.error || 'The assistant request failed.'
-					);
-				}
-
-				if (!data.response) {
-					throw new Error(
-						'The assistant returned an empty response.'
-					);
-				}
-
-				addMessage(data.response, 'assistant');
-				saveChatMessage('assistant', data.response);
-			} catch (error) {
-				console.error(error);
-
-				const fallbackMessage =
-					'The assistant is temporarily unavailable. Please try again.';
-				addMessage(fallbackMessage, 'assistant');
-				saveChatMessage('assistant', fallbackMessage);
-			} finally {
-				sendButton.disabled = false;
-
-				if (loadingMessage) {
-					loadingMessage.hidden = true;
-				}
-
-				input.focus();
 			}
-		};
 
-		sendButton.addEventListener('click', sendMessage);
+			const latestData = getAppData();
 
-		input.addEventListener('keydown', (event) => {
-			if (event.key === 'Enter') {
-				event.preventDefault();
-				sendMessage();
-			}
-		});
+			latestData.assistant.messages.push({
+				role: 'assistant',
+				content: data.response
+			});
+
+			saveAppData(latestData);
+			renderMessages();
+		} catch (error) {
+			console.error(error);
+
+			const latestData = getAppData();
+
+			latestData.assistant.messages.push({
+				role: 'assistant',
+				content:
+					'The assistant is temporarily unavailable. Please try again.'
+			});
+
+			saveAppData(latestData);
+			renderMessages();
+		} finally {
+			sendButton.disabled = false;
+			loadingMessage.hidden = true;
+			input.focus();
+		}
+	};
+
+	toggleButton.addEventListener('click', () => {
+		setOpenState(panel.hidden);
 	});
+
+	closeButton.addEventListener('click', () => {
+		setOpenState(false);
+	});
+
+	sendButton.addEventListener('click', sendMessage);
+
+	input.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			sendMessage();
+		}
+	});
+
+	const appData = getAppData();
+
+	renderMessages();
+	setOpenState(appData.assistant.isOpen);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1282,5 +1384,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupProfileHeader();
 	setupScoreRings();
 	setupDemoReset();
-	setupAssistant();
+	setupAssistantWidget();
 });
