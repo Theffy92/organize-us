@@ -698,7 +698,7 @@ function setupTimelinePage() {
 		statusMessage.textContent =
 			completionScore === 100
 				? 'Your record set is complete.'
-				: 'You&apos;re close to having a complete personal record set for your own organization.';
+				: "You\'re close to having a complete personal record set for your own organization.";
 	}
 
 	if (scoreRing) {
