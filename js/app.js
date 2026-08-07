@@ -87,7 +87,7 @@ function generateChecklist(process) {
 			},
 			{
 				id: crypto.randomUUID(),
-				name: 'Travel History',
+				name: 'Valid Passport',
 				status: 'Missing',
 				completed: false,
 			},
@@ -271,6 +271,36 @@ function setupTravelPage() {
 	);
 
 	if (!rows) return;
+	// Display travel guidance based on the user's immigration process
+	const travelGuidance = document.querySelector('[data-travel-guidance-text]');
+	const appData = getAppData();
+	const process = appData.profile.immigrationProcess;
+
+	const travelGuidanceMessages = {
+		naturalization:
+			'Travel history is especially important for Naturalization. ' +
+			'Form N-400 asks about trips outside the United States during ' +
+			'the applicable statutory period, and time outside the U.S. ' +
+			'can be relevant to continuous residence.',
+
+			'permanent-residency':
+				'Travel history may be relevant when applying for Permanent ' +
+				'Residency, depending on your specific immigration path. ' +
+				'OrganizeUS helps you keep these records available without ' +
+				'assuming the same requirements apply to every applicant.',
+
+			'f1-visa':
+				'Travel history can also be relevant for an F-1 visa. The ' +
+				'DS-160 may ask about previous U.S. visits and international ' +
+				'travel history, so keeping your past travel dates organized ' +
+				'can make this information easier to reference.'
+	}
+
+	if (travelGuidance) {
+		travelGuidance.textContent =
+			travelGuidanceMessages[process] || 
+			'Keep your travel history organized for easy reference.';
+	}
 
 	const calculateDuration = (departure, returnDate) => {
 		const departureDate = new Date(`${departure}T00:00:00`);
@@ -389,7 +419,7 @@ function setupTravelPage() {
 
 				return;
 			}
-
+			//get the latest app data to ensure we have the most up-to-date information before adding a new trip
 			const appData = getAppData();
 
 			appData.trips.push({
@@ -660,6 +690,17 @@ function setupTimelinePage() {
 	const completionScore =
 		calculateCompletionScore(appData);
 
+	const statusMessage = document.querySelector(
+		'[data-timeline-status-message]'
+	);
+
+	if (statusMessage) {
+		statusMessage.textContent =
+			completionScore === 100
+				? 'Your record set is complete.'
+				: 'You&apos;re close to having a complete personal record set for your own organization.';
+	}
+
 	if (scoreRing) {
 		scoreRing.dataset.score = String(completionScore);
 		scoreRing.style.setProperty(
@@ -821,6 +862,8 @@ function setupOnboarding() {
 		document.querySelectorAll('[data-onboarding-step]')
 	);
 
+	const actionsContainer = document.querySelector('.onboarding-actions');
+
 	const progressBar = document.querySelector(
 		'[data-onboarding-progress]'
 	);
@@ -897,6 +940,13 @@ function setupOnboarding() {
 		steps.forEach((step, index) => {
 			step.hidden = index !== stepIndex;
 		});
+
+		if (actionsContainer) {
+			const isLastStep = stepIndex === steps.length - 1;
+
+			actionsContainer.hidden = isLastStep;
+			actionsContainer.style.display = isLastStep ? 'none' : 'flex';
+		}
 
 		if (progressBar) {
 			progressBar.style.width =
