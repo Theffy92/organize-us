@@ -690,6 +690,17 @@ function setupTimelinePage() {
 	const completionScore =
 		calculateCompletionScore(appData);
 
+	const statusMessage = document.querySelector(
+		'[data-timeline-status-message]'
+	);
+
+	if (statusMessage) {
+		statusMessage.textContent =
+			completionScore === 100
+				? 'Your record set is complete.'
+				: 'You&apos;re close to having a complete personal record set for your own organization.';
+	}
+
 	if (scoreRing) {
 		scoreRing.dataset.score = String(completionScore);
 		scoreRing.style.setProperty(
