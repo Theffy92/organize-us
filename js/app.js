@@ -821,6 +821,8 @@ function setupOnboarding() {
 		document.querySelectorAll('[data-onboarding-step]')
 	);
 
+	const actionsContainer = document.querySelector('.onboarding-actions');
+
 	const progressBar = document.querySelector(
 		'[data-onboarding-progress]'
 	);
@@ -897,6 +899,13 @@ function setupOnboarding() {
 		steps.forEach((step, index) => {
 			step.hidden = index !== stepIndex;
 		});
+
+		if (actionsContainer) {
+			const isLastStep = stepIndex === steps.length - 1;
+
+			actionsContainer.hidden = isLastStep;
+			actionsContainer.style.display = isLastStep ? 'none' : 'flex';
+		}
 
 		if (progressBar) {
 			progressBar.style.width =
