@@ -79,7 +79,9 @@ def run_onboarding_model(step: str, profile: dict) -> str:
     user_prompt = build_onboarding_prompt(step, profile)
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
+        reasoning_effort="low",
+        include_reasoning=False,
         messages=[
             {
                 "role": "system",
@@ -115,7 +117,7 @@ passport numbers, A-numbers, or receipt numbers.
 - Keep responses concise and easy to understand.
 """
 
-def run_assistant_model(message:str, profile:dict, documents:list) -> str:
+def run_assistant_model(message: str, profile: dict, documents: list) -> str:
     """Answer a post-onboarding question using the user's saved app context."""
     client = _get_groq_client()
 
@@ -126,7 +128,9 @@ def run_assistant_model(message:str, profile:dict, documents:list) -> str:
     }
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        reasoning_effort="low",
+        include_reasoning=False,
+        model="openai/gpt-oss-120b",
         messages=[
             {
                 "role": "system",
