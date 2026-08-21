@@ -1,5 +1,10 @@
 const STORAGE_KEY = 'organizeUsData';
 
+const API_BASE_URL =
+	window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+		? 'http://127.0.0.1:5000'
+		: 'https://organize-us-api.onrender.com';
+
 const defaultAppData = {
 	profile: {
 		name: '',
@@ -906,7 +911,7 @@ function setupOnboarding() {
 
 	const requestAiMessage = async (step) => {
 		const response = await fetch(
-			'https://organize-us-api.onrender.com/chat',
+			`${API_BASE_URL}/chat`,
 			{
 				method: 'POST',
 				headers: {
@@ -1174,7 +1179,7 @@ function setupOnboarding() {
 
 	if (finishButton) {
 		finishButton.addEventListener('click', () => {
-			const appData = getAppData();
+			const appData = createDefaultAppData();
 
 			appData.profile = {
 				name: onboardingData.name,
@@ -1593,7 +1598,7 @@ function setupAssistantWidget() {
 
 		try {
 			const response = await fetch(
-				'https://organize-us-api.onrender.com/assistant',
+				`${API_BASE_URL}/assistant`,
 				{
 					method: 'POST',
 					headers: {
