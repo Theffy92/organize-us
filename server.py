@@ -11,17 +11,6 @@ CORS(
         "https://theffy92.github.io",
     ],
 )
-# CORS(app,
-#     resources={
-#         r"/*": {
-#             "origins": [
-#                 "http://localhost:8000",
-#                 "http://127.0.0.1:8000",
-#                 "https://theffy92.github.io",
-#             ]
-#                 }
-#             },
-#     ) # Allows the GitHub Pages frontend to make requests to the Flask backend
 
 @app.get("/health")
 def health():
