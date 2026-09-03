@@ -121,8 +121,7 @@ OrganizeUS helps users keep that information organized in one place, making it e
 
 ### Demo Video 
 
-<!-- [Watch the OrganizeUs Demo](https://youtu.be/DZ8kkkd8Z4M) -->
-[![Watch the OrganizeUS Demo](https://img.youtube.com/vi/DZ8kkkd8Z4M/maxresdefault.jpg)](https://youtu.be/DZ8kkkd8Z4M)
+[![Watch the OrganizeUS Demo](https://img.youtube.com/vi/DZ8kkkd8Z4M/maxresdefault.jpg?v=2)](https://youtu.be/DZ8kkkd8Z4M)
 
 ### Try the Prototype
 
