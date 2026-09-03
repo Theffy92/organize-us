@@ -123,8 +123,6 @@ OrganizeUS helps users keep that information organized in one place, making it e
 
 [Watch the OrganizeUs Demo](https://youtu.be/DZ8kkkd8Z4M)
 
-The latest version of the frontend is automatically deployed through GitHub Pages whenever changes are merged into the `main` branch.
-
 ### Try the Prototype
 
 https://theffy92.github.io/organize-us/
@@ -132,6 +130,8 @@ https://theffy92.github.io/organize-us/
 > **Note:** The backend is hosted on Render's free tier and may spin down after a period of inactivity. If the first AI onboarding response takes a little longer to load, please allow a few moments for the server to wake up. Subsequent responses should be faster.
 
 ---
+
+The latest version of the frontend is automatically deployed through GitHub Pages whenever changes are merged into the `main` branch.
 
 ## Demo Flow
 
