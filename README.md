@@ -61,10 +61,12 @@ OrganizeUS helps users keep that information organized in one place, making it e
 - Uses the user's saved profile and document checklist as context
 - Does **not** provide legal advice
 
-### 💾 Persistent demo data
-- Browser Local Storage
-- Demo data persists across page refreshes
-- Reset Demo option to restart the experience
+### 🔐 Accounts and persistent data
+- Create an account before saving onboarding or application data
+- Session-based login with hashed passwords
+- SQLite-backed profiles, documents, trips, and assistant history
+- Temporary onboarding drafts remain in the browser until authentication
+- Reset Demo clears the authenticated account data
 
 ### 📱 Responsive interface
 - Desktop and mobile friendly
@@ -91,7 +93,8 @@ OrganizeUS helps users keep that information organized in one place, making it e
 
 ### Storage
 
-- Browser Local Storage
+- SQLite for authenticated application data
+- `sessionStorage` only for an unfinished onboarding draft
 
 ### Deployment
 
@@ -103,6 +106,7 @@ OrganizeUS helps users keep that information organized in one place, making it e
 ## Project structure
 
 - `index.html` — landing page
+- `auth.html` — account creation and login
 - `onboarding.html` — AI-guided onboarding
 - `dashboard.html` — personalized dashboard
 - `travel.html` — travel history
@@ -149,17 +153,27 @@ The latest version of the frontend is automatically deployed through GitHub Page
 
 ## GitHub Codespaces
 
-1. Open the repository on GitHub.
-2. Click **Code**.
-3. Select the **Codespaces** tab.
-4. Create a Codespace from `main`.
-5. Run:
+1. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Start the API:
+
+```bash
+python3 server.py
+```
+
+3. In a second terminal, serve the frontend:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-6. Open the forwarded port.
+4. Open `http://localhost:8000`.
+
+The API creates `organize_us.db` automatically. Set `ORGANIZE_US_DATABASE` to use a different path. Set `FLASK_ENV=production` behind HTTPS so session cookies use production settings. The configured frontend origins must remain listed in `server.py` because authenticated API requests use credentials.
 
 ---
 
@@ -220,9 +234,8 @@ Requirements:
 
 ## Current Limitations
 
-- No authentication
-- No database
-- Local Storage only
+- SQLite requires persistent storage in deployment; an ephemeral filesystem will lose accounts
+- No email verification, password reset, social login, or production rate limiting
 - No document uploads
 - No reminder notifications
 - No OCR
@@ -233,8 +246,7 @@ Requirements:
 
 ## Future Improvements
 
-- User accounts
-- Cloud database
+- Managed cloud database
 - Encrypted storage
 - Reminder notifications
 - AI-generated organizational summaries
