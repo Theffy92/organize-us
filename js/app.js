@@ -1,7 +1,9 @@
 const STORAGE_KEY = 'organizeUsData';
+const ONBOARDING_DRAFT_KEY = 'organizeUsOnboardingDraft';
 
 const API_BASE_URL =
-	window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+	window.location.hostname === 'localhost' ||
+	window.location.hostname === '127.0.0.1'
 		? 'http://127.0.0.1:5000'
 		: 'https://organize-us-api.onrender.com';
 
@@ -22,11 +24,34 @@ const defaultAppData = {
 	}
 };
 
+let appDataCache = null;
+let authenticatedUser = null;
+
+async function apiRequest(path, options = {}) {
+	const response = await fetch(`${API_BASE_URL}${path}`, {
+		...options,
+		credentials: 'include',
+		headers: {
+			...(options.body ? { 'Content-Type': 'application/json' } : {}),
+			...(options.headers || {})
+		}
+	});
+	const data = await response.json().catch(() => ({}));
+
+	if (!response.ok) {
+		throw new Error(data.error || 'The request could not be completed.');
+	}
+
+	return data;
+}
+
 function createDefaultAppData() {
 	return JSON.parse(JSON.stringify(defaultAppData));
 }
 
 function getAppData() {
+	if (appDataCache) return appDataCache;
+
 	const savedData = localStorage.getItem(STORAGE_KEY);
 
 	if (!savedData) {
@@ -62,11 +87,126 @@ function getAppData() {
 }
 
 function saveAppData(data) {
+	appDataCache = data;
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 function resetAppData() {
+	appDataCache = null;
 	localStorage.removeItem(STORAGE_KEY);
+}
+
+function getOnboardingDraft() {
+	try {
+		return JSON.parse(sessionStorage.getItem(ONBOARDING_DRAFT_KEY)) || {};
+	} catch (_error) {
+		return {};
+	}
+}
+
+function saveOnboardingDraft(draft) {
+	sessionStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(draft));
+}
+
+function clearOnboardingDraft() {
+	sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+}
+
+async function bootstrapApplication() {
+	const page = document.body.dataset.page;
+	const publicPages = ['home', 'auth', 'onboarding'];
+
+	if (publicPages.includes(page)) {
+		if (page === 'onboarding') {
+			try {
+				const data = await apiRequest('/api/auth/me');
+				authenticatedUser = data.user;
+			} catch (_error) {
+				authenticatedUser = null;
+			}
+		}
+		return;
+	}
+
+	try {
+		const auth = await apiRequest('/api/auth/me');
+		authenticatedUser = auth.user;
+		appDataCache = await apiRequest('/api/app-data');
+	} catch (_error) {
+		window.location.href = 'auth.html';
+	}
+}
+
+function setupAuth() {
+	const form = document.querySelector('[data-auth-form]');
+	if (!form) return;
+
+	const modeButtons = document.querySelectorAll('[data-auth-mode]');
+	const heading = document.querySelector('[data-auth-heading]');
+	const description = document.querySelector('[data-auth-description]');
+	const submitButton = document.querySelector('[data-auth-submit]');
+	const password = form.querySelector('[name="password"]');
+	const passwordHelp = document.querySelector('[data-password-help]');
+	const errorMessage = document.querySelector('[data-auth-error]');
+	let mode = 'register';
+
+	const renderMode = () => {
+		const registering = mode === 'register';
+		modeButtons.forEach((button) => {
+			const active = button.dataset.authMode === mode;
+			button.classList.toggle('active', active);
+			button.setAttribute('aria-selected', String(active));
+		});
+		heading.textContent = registering ? 'Create your account' : 'Welcome back';
+		description.textContent = registering
+			? 'Save your onboarding details and return whenever you are ready.'
+			: 'Log in to continue organizing your immigration journey.';
+		submitButton.textContent = registering ? 'Create account' : 'Log in';
+		password.autocomplete = registering ? 'new-password' : 'current-password';
+		passwordHelp.hidden = !registering;
+	};
+
+	modeButtons.forEach((button) => {
+		button.addEventListener('click', () => {
+			mode = button.dataset.authMode;
+			errorMessage.hidden = true;
+			renderMode();
+		});
+	});
+
+	form.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		errorMessage.hidden = true;
+		submitButton.disabled = true;
+		submitButton.textContent = mode === 'register' ? 'Creating account...' : 'Logging in...';
+
+		try {
+			const formData = new FormData(form);
+			const data = await apiRequest(`/api/auth/${mode}`, {
+				method: 'POST',
+				body: JSON.stringify({
+					email: formData.get('email'),
+					password: formData.get('password')
+				})
+			});
+			authenticatedUser = data.user;
+			const draft = getOnboardingDraft();
+			if (draft.name && draft.country && draft.immigrationProcess) {
+				window.location.href = 'onboarding.html';
+			} else if (data.user.profile.onboardingCompleted) {
+				window.location.href = 'dashboard.html';
+			} else {
+				window.location.href = 'onboarding.html';
+			}
+		} catch (error) {
+			errorMessage.textContent = error.message;
+			errorMessage.hidden = false;
+			submitButton.disabled = false;
+			renderMode();
+		}
+	});
+
+	renderMode();
 }
 
 function svg(name) {
@@ -79,6 +219,15 @@ function svg(name) {
 
 function formatDate(date) {
 	return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+}
+
+function escapeHtml(value) {
+	return String(value)
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
 }
 
 function generateChecklist(process) {
@@ -333,7 +482,7 @@ function setupTravelPage() {
 			row.innerHTML = `
 				<td>
 					<div class="table-country">
-						<strong>${trip.country}</strong>
+						<strong>${escapeHtml(trip.country)}</strong>
 						<span>International</span>
 					</div>
 				</td>
@@ -357,7 +506,7 @@ function setupTravelPage() {
 						type="button"
 						class="delete-trip"
 						data-delete-trip
-						data-trip-id="${trip.id}"
+						data-trip-id="${escapeHtml(trip.id)}"
 					>
 						Delete
 					</button>
@@ -398,7 +547,7 @@ function setupTravelPage() {
 	};
 
 	if (form) {
-		form.addEventListener('submit', (event) => {
+		form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 
 			const country =
@@ -427,20 +576,22 @@ function setupTravelPage() {
 			//get the latest app data to ensure we have the most up-to-date information before adding a new trip
 			const appData = getAppData();
 
-			appData.trips.push({
-				id: crypto.randomUUID(),
-				country,
-				departure,
-				returnDate,
-				duration: calculateDuration(
-					departure,
-					returnDate
-				)
-			});
-
-			appData.travelReviewed = true;
-
-			saveAppData(appData);
+			try {
+				const result = await apiRequest('/api/trips', {
+					method: 'POST',
+					body: JSON.stringify({
+						country,
+						departure,
+						returnDate,
+						duration: calculateDuration(departure, returnDate)
+					})
+				});
+				appData.trips.push(result.trip);
+				appData.travelReviewed = true;
+			} catch (error) {
+				alert(error.message);
+				return;
+			}
 
 			form.reset();
 			renderTrips();
@@ -459,7 +610,7 @@ function setupTravelPage() {
 		});
 	}
 
-	rows.addEventListener('click', (event) => {
+	rows.addEventListener('click', async (event) => {
 		const deleteButton = event.target.closest(
 			'[data-delete-trip]'
 		);
@@ -467,13 +618,15 @@ function setupTravelPage() {
 		if (!deleteButton) return;
 
 		const tripId = deleteButton.dataset.tripId;
+		try {
+			await apiRequest(`/api/trips/${tripId}`, { method: 'DELETE' });
+		} catch (error) {
+			alert(error.message);
+			return;
+		}
+
 		const appData = getAppData();
-
-		appData.trips = appData.trips.filter(
-			(trip) => trip.id !== tripId
-		);
-
-		saveAppData(appData);
+		appData.trips = appData.trips.filter((trip) => trip.id !== tripId);
 		renderTrips();
 	});
 
@@ -514,7 +667,7 @@ function setupDocumentsPage() {
 
 			card.innerHTML = `
 				<div class="doc-icon">${svg('file')}</div>
-				<h3>${documentItem.name}</h3>
+				<h3>${escapeHtml(documentItem.name)}</h3>
 				<p>
 					${documentItem.completed
 						? 'This document is marked as organized.'
@@ -529,7 +682,7 @@ function setupDocumentsPage() {
 							: 'danger'
 					}"
 					data-document-toggle
-					data-document-id="${documentItem.id}"
+					data-document-id="${escapeHtml(documentItem.id)}"
 				>
 					${documentItem.completed
 						? 'On file'
@@ -568,7 +721,7 @@ function setupDocumentsPage() {
 		}
 	};
 
-	grid.addEventListener('click', (event) => {
+	grid.addEventListener('click', async (event) => {
 		const toggleButton = event.target.closest(
 			'[data-document-toggle]'
 		);
@@ -586,17 +739,26 @@ function setupDocumentsPage() {
 
 		if (!documentItem) return;
 
-		documentItem.completed = !documentItem.completed;
-		documentItem.status = documentItem.completed
+		const completed = !documentItem.completed;
+		try {
+			await apiRequest(`/api/documents/${documentId}`, {
+				method: 'PATCH',
+				body: JSON.stringify({ completed })
+			});
+		} catch (error) {
+			alert(error.message);
+			return;
+		}
+
+		documentItem.completed = completed;
+		documentItem.status = completed
 			? 'On file'
 			: 'Missing';
-
-		saveAppData(appData);
 		renderDocuments();
 	});
 
 	if (form) {
-		form.addEventListener('submit', (event) => {
+		form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 
 			const appData = getAppData();
@@ -610,16 +772,16 @@ function setupDocumentsPage() {
 
 			if (!name) return;
 
-			appData.documents.push({
-				id: crypto.randomUUID(),
-				name,
-				status,
-				completed: status === 'On file',
-				location,
-				expiry
-			});
-
-			saveAppData(appData);
+			try {
+				const result = await apiRequest('/api/documents', {
+					method: 'POST',
+					body: JSON.stringify({ name, status, location, expiry })
+				});
+				appData.documents.push(result.document);
+			} catch (error) {
+				alert(error.message);
+				return;
+			}
 
 			form.reset();
 			renderDocuments();
@@ -750,7 +912,7 @@ function setupTimelinePage() {
 				<div>
 					<strong>${departureDate.getFullYear()}</strong>
 					<p>
-						Recorded a trip to ${trip.country}
+						Recorded a trip to ${escapeHtml(trip.country)}
 						(${trip.duration} days)
 					</p>
 				</div>
@@ -772,7 +934,7 @@ function setupTimelinePage() {
 					<div>
 						<strong>Organized</strong>
 						<p>
-							Marked ${documentItem.name} as on file
+							Marked ${escapeHtml(documentItem.name)} as on file
 						</p>
 					</div>
 				`;
@@ -833,7 +995,7 @@ function setupTimelinePage() {
 				row.className = 'info-row';
 
 				row.innerHTML = `
-					<span>${documentItem.name}</span>
+					<span>${escapeHtml(documentItem.name)}</span>
 					<span class="pill warning">
 						Missing
 					</span>
@@ -902,6 +1064,20 @@ function setupOnboarding() {
 		country: '',
 		immigrationProcess: ''
 	};
+	Object.assign(onboardingData, getOnboardingDraft());
+
+	const nameInput = document.querySelector('[name="profileName"]');
+	const countryInput = document.querySelector('[name="country"]');
+	const processInput = document.querySelector('[name="immigrationProcess"]');
+	if (nameInput) nameInput.value = onboardingData.name;
+	if (countryInput) countryInput.value = onboardingData.country;
+	if (processInput) processInput.value = onboardingData.immigrationProcess;
+	if (onboardingData.immigrationProcess) {
+		const selectedChoice = document.querySelector(
+			`[data-choice][data-value="${onboardingData.immigrationProcess}"]`
+		);
+		selectedChoice?.classList.add('active');
+	}
 
 	const processLabels = {
 		'permanent-residency': 'Permanent Residency',
@@ -1044,6 +1220,7 @@ function setupOnboarding() {
 					}
 
 					onboardingData.name = name;
+					saveOnboardingDraft(onboardingData);
 
 					const aiMessage = await requestAiMessage(
 						'name-completed'
@@ -1074,6 +1251,7 @@ function setupOnboarding() {
 					}
 
 					onboardingData.country = country;
+					saveOnboardingDraft(onboardingData);
 
 					const aiMessage = await requestAiMessage(
 						'country-completed'
@@ -1107,6 +1285,7 @@ function setupOnboarding() {
 
 					onboardingData.immigrationProcess =
 						processValue;
+					saveOnboardingDraft(onboardingData);
 
 					const selectedProcess =
 						processLabels[processValue];
@@ -1178,23 +1357,25 @@ function setupOnboarding() {
 	}
 
 	if (finishButton) {
-		finishButton.addEventListener('click', () => {
-			const appData = createDefaultAppData();
-
-			appData.profile = {
-				name: onboardingData.name,
-				country: onboardingData.country,
-				immigrationProcess: onboardingData.immigrationProcess
-			};
-
-			appData.onboardingCompleted = true;
-
-			appData.documents = generateChecklist(onboardingData.immigrationProcess);
-
-			saveAppData(appData);
-			// console.log('Completed onboarding:', onboardingData);
-
-			window.location.href = 'dashboard.html';
+		finishButton.addEventListener('click', async () => {
+			finishButton.disabled = true;
+			try {
+				saveOnboardingDraft(onboardingData);
+				if (!authenticatedUser) {
+					window.location.href = 'auth.html';
+					return;
+				}
+				appDataCache = await apiRequest('/api/onboarding/complete', {
+					method: 'POST',
+					body: JSON.stringify(onboardingData)
+				});
+				clearOnboardingDraft();
+				window.location.href = 'dashboard.html';
+			} catch (error) {
+				console.error(error);
+				alert(error.message);
+				finishButton.disabled = false;
+			}
 		});
 	}
 
@@ -1397,16 +1578,38 @@ function setupDemoReset() {
 
 	if (!resetButton) return;
 
-	resetButton.addEventListener('click', () => {
+	resetButton.addEventListener('click', async () => {
 		const confirmed = window.confirm(
 			'Clear all fictional demo data and restart onboarding?'
 		);
 
 		if (!confirmed) return;
 
-		resetAppData();
+		try {
+			await apiRequest('/api/app-data', { method: 'DELETE' });
+			resetAppData();
+			clearOnboardingDraft();
+			window.location.href = 'onboarding.html';
+		} catch (error) {
+			alert(error.message);
+		}
+	});
+}
 
-		window.location.href = 'onboarding.html';
+function setupLogout() {
+	document.querySelectorAll('[data-logout]').forEach((button) => {
+		button.addEventListener('click', async () => {
+			button.disabled = true;
+			try {
+				await apiRequest('/api/auth/logout', { method: 'POST' });
+				appDataCache = null;
+				authenticatedUser = null;
+				window.location.href = 'index.html';
+			} catch (error) {
+				button.disabled = false;
+				alert(error.message);
+			}
+		});
 	});
 }
 
@@ -1567,10 +1770,6 @@ function setupAssistantWidget() {
 			String(isOpen)
 		);
 
-		const appData = getAppData();
-		appData.assistant.isOpen = isOpen;
-		saveAppData(appData);
-
 		if (isOpen) {
 			renderMessages();
 			input.focus();
@@ -1582,66 +1781,30 @@ function setupAssistantWidget() {
 
 		if (!message) return;
 
-		const appData = getAppData();
-
-		appData.assistant.messages.push({
-			role: 'user',
-			content: message
-		});
-
-		saveAppData(appData);
-		renderMessages();
-
 		input.value = '';
 		sendButton.disabled = true;
 		loadingMessage.hidden = false;
 
 		try {
-			const response = await fetch(
-				`${API_BASE_URL}/assistant`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						message,
-						profile: appData.profile,
-						documents: appData.documents
-					})
-				}
-			);
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(
-					data.error ||
-					'The assistant request failed.'
-				);
-			}
+			const data = await apiRequest('/assistant', {
+				method: 'POST',
+				body: JSON.stringify({ message })
+			});
 
 			const latestData = getAppData();
 
+			latestData.assistant.messages.push({
+				role: 'user',
+				content: message
+			});
 			latestData.assistant.messages.push({
 				role: 'assistant',
 				content: data.response
 			});
-
-			saveAppData(latestData);
 			renderMessages();
 		} catch (error) {
 			console.error(error);
 
-			const latestData = getAppData();
-
-			latestData.assistant.messages.push({
-				role: 'assistant',
-				content:
-					'The assistant is temporarily unavailable. Please try again.'
-			});
-
-			saveAppData(latestData);
 			renderMessages();
 		} finally {
 			sendButton.disabled = false;
@@ -1673,13 +1836,15 @@ function setupAssistantWidget() {
 	setOpenState(appData.assistant.isOpen);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 	// // temporary datafor testing
 	// const testData = getAppData();
 	// console.log('Loaded OrganizeUs data:', testData);
+	await bootstrapApplication();
 
 	setActiveNav();
 	setupLandingMenu();
+	setupAuth();
 	setupSidebar();
 	setupModals();
 	setupTravelPage();
@@ -1690,5 +1855,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	setupDashboard();
 	setupProfileHeader();
 	setupDemoReset();
+	setupLogout();
 	setupAssistantWidget();
 });

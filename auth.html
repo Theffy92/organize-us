@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OrganizeUS | Account</title>
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="auth" class="auth-page">
+	<main class="auth-shell">
+		<a class="brand" href="index.html" aria-label="OrganizeUS home">
+			<span class="brand-mark" aria-hidden="true">O</span>
+			<span>OrganizeUS</span>
+		</a>
+
+		<section class="auth-layout" aria-labelledby="auth-title">
+			<div class="auth-intro">
+				<span class="eyebrow">Your organized starting point</span>
+				<h1 id="auth-title">Keep your immigration journey in one place.</h1>
+				<p class="lead">Create an account to save your profile, checklist, travel history, and documents securely between visits.</p>
+				<div class="auth-trust-list">
+					<span>No document uploads</span>
+					<span>Private account data</span>
+					<span>Built for organization, not legal advice</span>
+				</div>
+			</div>
+
+			<div class="auth-card">
+				<div class="auth-tabs" role="tablist" aria-label="Account actions">
+					<button class="auth-tab active" type="button" data-auth-mode="register" role="tab" aria-selected="true">Create account</button>
+					<button class="auth-tab" type="button" data-auth-mode="login" role="tab" aria-selected="false">Log in</button>
+				</div>
+
+				<form class="auth-form" data-auth-form>
+					<div>
+						<h2 data-auth-heading>Create your account</h2>
+						<p class="field-help" data-auth-description>Save your onboarding details and return whenever you are ready.</p>
+					</div>
+
+					<label class="field-group" for="auth-email">
+						<span class="field-label">Email address</span>
+						<input id="auth-email" name="email" type="email" autocomplete="email" required>
+					</label>
+
+					<label class="field-group" for="auth-password">
+						<span class="field-label">Password</span>
+						<input id="auth-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+						<span class="field-help" data-password-help>Use at least 8 characters.</span>
+					</label>
+
+					<p class="form-error" data-auth-error role="alert" hidden></p>
+					<button class="btn auth-submit" type="submit" data-auth-submit>Create account</button>
+				</form>
+			</div>
+		</section>
+	</main>
+	<script src="js/app.js"></script>
+</body>
+</html>

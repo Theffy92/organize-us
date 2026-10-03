@@ -4,3 +4,6 @@
 .env
 __pycache__/
 *.pyc
+organize_us.db
+organize_us.db-shm
+organize_us.db-wal
