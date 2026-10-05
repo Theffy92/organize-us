@@ -65,10 +65,12 @@ def build_onboarding_prompt(step: str, profile: dict) -> str:
         selected_process = process_labels.get(process, process)
 
         return (
-            f"The user's name is {name}, the relevant country is {country}, "
-            f"and they selected {selected_process}. Confirm their selection "
-            "in one or two short sentences. Explain that OrganizeUS will "
-            "prepare a personalized checklist and organization tools."
+            f"The user's name is {name}. Their country of citizenship is  "
+            f"{country}, and they selected {selected_process} as their "
+            "U.S immigration process. Confirm this selection in one or two short "
+            "sentences. Do not ask a queustion. Do not request an email address, "
+            "contact information, or any additional data. Do not mention "
+            "resources being emailed."
         )
 
     raise ValueError("Unsupported onboarding step.")
