@@ -47,15 +47,16 @@ def build_onboarding_prompt(step: str, profile: dict) -> str:
     if step == "name-completed":
         return (
             f"The user's profile name is {name}. "
-            "Briefly greet them by name and ask which country is relevant "
-            "to their U.S. immigration journey."
+            "Briefly greet them by name and ask for their country of citizenship. "
+            "Clarify that this means their nationality, not the destination "
+            "country of the immigration process."
         )
 
     if step == "country-completed":
         return (
-            f"The user's name is {name}, and the country relevant to their "
-            f"immigration journey is {country}. Briefly acknowledge their "
-            "answer and ask which immigration process they are organizing. "
+            f"The user's name is {name}, and their country of citizenship is "
+            f"{country}. Briefly acknowledge their answer and ask which "
+            "U.S. immigration process they are organizing. "
             "Mention that the available options are Permanent Residency, "
             "Naturalization, and F-1 Student Visa."
         )
