@@ -4,7 +4,7 @@ const ONBOARDING_DRAFT_KEY = 'organizeUsOnboardingDraft';
 const API_BASE_URL =
 	window.location.hostname === 'localhost' ||
 	window.location.hostname === '127.0.0.1'
-		? 'http://127.0.0.1:5000'
+		? 'http://127.0.0.1:5050'
 		: 'https://organize-us-api.onrender.com';
 
 const defaultAppData = {
