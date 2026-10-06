@@ -47,15 +47,16 @@ def build_onboarding_prompt(step: str, profile: dict) -> str:
     if step == "name-completed":
         return (
             f"The user's profile name is {name}. "
-            "Briefly greet them by name and ask which country is relevant "
-            "to their U.S. immigration journey."
+            "Briefly greet them by name and ask for their country of citizenship. "
+            "Clarify that this means their nationality, not the destination "
+            "country of the immigration process."
         )
 
     if step == "country-completed":
         return (
-            f"The user's name is {name}, and the country relevant to their "
-            f"immigration journey is {country}. Briefly acknowledge their "
-            "answer and ask which immigration process they are organizing. "
+            f"The user's name is {name}, and their country of citizenship is "
+            f"{country}. Briefly acknowledge their answer and ask which "
+            "U.S. immigration process they are organizing. "
             "Mention that the available options are Permanent Residency, "
             "Naturalization, and F-1 Student Visa."
         )
@@ -64,10 +65,12 @@ def build_onboarding_prompt(step: str, profile: dict) -> str:
         selected_process = process_labels.get(process, process)
 
         return (
-            f"The user's name is {name}, the relevant country is {country}, "
-            f"and they selected {selected_process}. Confirm their selection "
-            "in one or two short sentences. Explain that OrganizeUS will "
-            "prepare a personalized checklist and organization tools."
+            f"The user's name is {name}. Their country of citizenship is  "
+            f"{country}, and they selected {selected_process} as their "
+            "U.S immigration process. Confirm this selection in one or two short "
+            "sentences. Do not ask a queustion. Do not request an email address, "
+            "contact information, or any additional data. Do not mention "
+            "resources being emailed."
         )
 
     raise ValueError("Unsupported onboarding step.")
